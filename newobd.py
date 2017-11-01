@@ -1,5 +1,5 @@
 
-from OBDSIM import *
+#from OBDSIM import *
 from os import system
 #global vars here
 #---------------------
@@ -9,11 +9,12 @@ rpm =0
 oiltemp = 0
 intakepressue =0
 hascar = True
-
+osx= True #change to false on linux
+debug = False
 import re
 import serial
 import time
-import logging
+
 from protocols import *
 
 class OBDcom:
@@ -70,10 +71,10 @@ class OBDcom:
                                         bytesize = 8,
                                         timeout = 10) # seconds
         except serial.SerialException as e:
-            self.__error(e)
+            print(e)
             return
         except OSError as e:
-            self.__error(e)
+            print(e)
             return
 
         # ------------------------ find the ELM's baud ------------------------
@@ -298,11 +299,18 @@ class OBDcom:
         lines = [ s.strip() for s in re.split("[\r\n]", string) if bool(s) ]
 
         return lines
-    
-com =OBDcom('/dev/ttyUSB0', 115200, None)
-ans = com.send_and_parse(b'0101')
-print(ans[0].raw())
-ans = com.send_and_parse(b'0100')
-print(ans[0].raw())
-ans = com.send_and_parse(b'010c')
-print(ans[0].raw())
+#only one usbcom device allowed with this program
+if osx:
+    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '1')
+else:
+    com =OBDcom('/dev/ttyUSB0', 115200, None)
+if(debug):
+    ans = com.send_and_parse(b'0101')
+    print(ans[0].raw())
+    ans = com.send_and_parse(b'0100')
+    print(ans[0].raw())
+    ans = com.send_and_parse(b'010c')
+    print(ans[0].raw())
+
+
+print('Setup Complete.')
