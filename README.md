@@ -7,6 +7,8 @@ Uses python to communicate with your car. This Library is designed to work with 
 <h1>Prereqs</h1>
 <ul>
   <li>Python 2.7</li>
+  <li>Pyserial from <code>sudo pip install serial</code></li>
+  <li>obd from <code>sudo pip install obd</code></li>
   <li>This package properly installed</li>
   <li>OBD2 ELM 327 USB adapter</li>
   <li>HDMI Display</li>
