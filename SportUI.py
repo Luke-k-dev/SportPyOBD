@@ -5,14 +5,22 @@ class UI():
     themeOne = None
     themeTwo = None
     themeThree = None
-    db = None
-    def __init__(self, css1, css2, css3, datab):
+    activetheme= None
+    def __init__(self, css1, css2, css3):
 
 
         print (css1)
         print (css2)
         print (css3)
-        db = datab
+
+        self.themeOne = css1
+        self.themeTwo = css2
+        self.themeThree = css3
+        self.activeTheme= css1
+
+    def changetheme(self, css):
+        self.activeTheme = css
+
 
 
 
@@ -35,26 +43,6 @@ class css():
     def __str__(self):
         return "COLORS: " +self.color1 + ' '+self.color2 + ' '+self.color3 + ' '+self.color4 + ' FONT:' + self.font +" FONT-SIZE: " + str(self.fontsize)
 
-class datablock():
-    #data per page 5 so only 5 pieces of info will be displayed
-    # setup commands for every page
-    #simply add the PID code for every piece of data you want
-    #PID table can be found here https://en.wikipedia.org/wiki/OBD-II_PIDs#Mode_01
-    tabOne = ['010C', '010F', '0167', '010B', '04']
-
-    tabTwo = ['0100', '0100', '0100', '0100', '0100']
-
-    tabThree = ['0100', '0100', '0100', '0100', '0100']
-    def __init__(self, tabone, tabtwo, tabthree):
-        print('data block ready.')
-        self.tabOne = tabone
-        self.tabTwo = tabtwo
-        self.tabThree = tabthree
-
-    #defult display
-    #rpm, intake air temperature, coolenttemp, intake pressure, engine load
-
-    #END OF LAYOUTS
 
 
 
@@ -67,7 +55,7 @@ if(testui):
     tab1 = ['010C', '010F', '0167', '010B', '0004']
     tab2 = ['0100', '0100', '0100', '0100', '0100']
     tab3 = ['0100', '0100', '0100', '0100', '0100']
-    d = datablock(tab1,tab2,tab3)
+
 
     ui = UI(t1,t2,t3, d)
 
