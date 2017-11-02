@@ -1,3 +1,15 @@
+
+
+
+
+
+
+#PLEASE DONT EVER RUN THIS. IT IS LEGACY CODE I REWROTE
+
+
+
+
+
 from obd import *
 from OBDSIM import *
 #global vars here

@@ -300,17 +300,17 @@ class OBDcom:
 
         return lines
 #only one usbcom device allowed with this program
-if osx:
-    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '1')
-else:
-    com =OBDcom('/dev/ttyUSB0', 115200, None)
-if(debug):
-    ans = com.send_and_parse(b'0101')
-    print(ans[0].raw())
-    ans = com.send_and_parse(b'0100')
-    print(ans[0].raw())
-    ans = com.send_and_parse(b'010c')
-    print(ans[0].raw())
+#if osx:
+#    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '1')
+#else:
+#    com =OBDcom('/dev/ttyUSB0', 115200, None)
+#if(debug):
+#    ans = com.send_and_parse(b'0101')
+#    print(ans[0].raw())
+#   ans = com.send_and_parse(b'0100')
+#    print(ans[0].raw())
+#    ans = com.send_and_parse(b'010c')
+#    print(ans[0].raw())
 
 
 print('Setup Complete.')
