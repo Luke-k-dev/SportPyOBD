@@ -18,6 +18,9 @@ import time
 from protocols import *
 
 class OBDcom:
+    def __call__(self, messages):
+        pass
+
     _SUPPORTED_PROTOCOLS = {
         #"0" : None, # Automatic Mode. This isn't an actual protocol. If the
                      # ELM reports this, then we don't have enough
@@ -252,7 +255,32 @@ class OBDcom:
 
         lines = self.__send(cmd)
         messages = self.__protocol(lines)
-        return messages
+        return  messages
+
+    def query(self, cmd, force=False):
+        """
+            primary API function. Sends commands to the car, and
+            protects against sending unsupported commands.
+        """
+
+        # send command and retrieve message
+        cmd_string = self.__build_command_string(cmd)
+        messages = self.send_and_parse(cmd_string)
+
+
+
+        return cmd(messages)  # compute a response object
+
+    def __build_command_string(self, cmd):
+        """ assembles the appropriate command string """
+        cmd_string = cmd.command
+
+        # if we know the number of frames that this command returns,
+        # only wait for exactly that number. This avoids some harsh
+        # timeouts from the ELM, thus speeding up queries.
+
+
+        return cmd_string
     
     def __read(self):
         """
@@ -300,17 +328,12 @@ class OBDcom:
 
         return lines
 #only one usbcom device allowed with this program
-#if osx:
-#    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '1')
-#else:
-#    com =OBDcom('/dev/ttyUSB0', 115200, None)
-#if(debug):
-#    ans = com.send_and_parse(b'0101')
-#    print(ans[0].raw())
-#   ans = com.send_and_parse(b'0100')
-#    print(ans[0].raw())
-#    ans = com.send_and_parse(b'010c')
-#    print(ans[0].raw())
+if osx and debug:
+    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '1')
+elif debug:
+    com =OBDcom('/dev/ttyUSB0', 115200, None)
+if(debug):
+    print('data: ' + str(com.query(commands.__mode1__[04])))
 
 
 print('Setup Complete.')

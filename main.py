@@ -3,16 +3,18 @@ from  SportUI import *
 from  newobd import *
 import Tkinter as tk
 import ttk
+import commands
 global currentPage
 currentPage=1
 ###SET UP OBD CONNECTION###
 com = None
 if osx:
     # ports may be different depending on drivers and device
-    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '1')
+    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '6')
 else:
 
-    com = OBDcom('/dev/ttyUSB0', 115200, None)
+    com = OBDcom('/dev/ttyUSB0', 115200, '6') ###POROTCAL 6 FOR 2013 FRS
+
 
 ###NOW LOAD IN UI DATA###
 # THEMES ARE HERE COLOR COLOR COLOR COLOR FONT SIZE
@@ -28,6 +30,46 @@ t3 = css("#FFF", "#FFF", "#FFF", "#FFF", "Helvetica", 16)
 ui = UI(t1, t2, t3)
 global buttonNavList
 buttonNavList=None
+
+#################################
+#GLOBAL VARS HERE
+#################################
+#OBD VALUES
+class PIDDATA():
+    def __init__(self, value, uibar, uitext, units):
+        self.value = value
+        self.uibar = uibar
+        self.uitxt= uitext
+        self.units = units
+    def changeValue(self, newvalue):
+        self.value = newvalue
+        self.uibar['value'] = self.value
+        self.uitxt['text'] = str(self.value)+str(self.units)
+
+
+global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp,OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
+
+#UI VARS
+
+#LOAD STATIC VALUES FROM FILE
+
+
+###UPDATE DATA FUNCTIONS
+def updateUIData():
+    global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
+
+    ThrottlePos.changeValue(com(commands.getPID("THROTTLE_POS")))
+    AbsoluteEngineLoad.changeValue(com(commands.getPID("ENGINE_LOAD")))
+    #print (com(commands.getPID("SPEED")))
+    #print('updating data')
+    checkforpopup()
+    root.after(1000, updateUIData)
+
+def checkforpopup():
+    ###this will be called once every second
+    #Pedal Dance Here
+
+    pass
 ###UI CLASS HERE
 
 class Page(tk.Frame):
@@ -53,13 +95,9 @@ class Page(tk.Frame):
                 
 
 class Page1(Page):
-    global throtlebar
-    def updatedata(self):
-        global throtlebar
-        throtlebar['value'] = 50
-    
+
+
     def __init__(self, *args, **kwargs):
-        global throtlebar
         Page.__init__(self, *args, **kwargs)
         frame = tk.Frame(self, bg = ui.activeTheme.color4)
         frame.pack(side="top", fill="both", expand=True)
@@ -74,7 +112,16 @@ class Page1(Page):
         #0110 MAF SENSOR FOR AIR FLOW
 
         #0143 ABSOLUTE ENGINE LOAD
-
+        engineabstitle = tk.Label(frame, text='Engine Load: ', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                                font=(ui.activeTheme.font, ui.activeTheme.fontsize))
+        engineabstitle.grid(column=0, row=3, sticky=tk.NE)
+        engineabsbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
+        engineabsbar['maximum'] = 25700
+        engineabsbar['value'] = 200
+        engineabstxt = tk.Label(frame, text='0%', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                              font=(ui.activeTheme.font, ui.activeTheme.fontsize))
+        engineabstxt.grid(column=2, row=3, sticky=tk.NS)
+        engineabsbar.grid(column=1, row=3, sticky=tk.NS)
         #015C ENGINE OIL TEMP
 
         #015E ENGINE FUEL RATE LITERS/HR
@@ -84,13 +131,24 @@ class Page1(Page):
         #0168 INTAKE AIR TEMP
 
         #throttle pos PID: 0111
-        throtletitle = tk.Label(frame, text='Throtle Pos: ', bg=ui.activeTheme.color4, fg = ui.activeTheme.color1, font =(ui.activeTheme.font, ui.activeTheme.fontsize))
+        throtletitle = tk.Label(frame, text='Throttle Pos: ', bg=ui.activeTheme.color4, fg = ui.activeTheme.color1, font =(ui.activeTheme.font, ui.activeTheme.fontsize))
         throtletitle.grid(column =0, row=2, sticky= tk.NE)
         throtlebar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
         throtlebar['maximum'] = 100
         throtlebar['value'] = 10
+        throtletxt= tk.Label(frame, text='0%', bg=ui.activeTheme.color4, fg = ui.activeTheme.color1, font =(ui.activeTheme.font, ui.activeTheme.fontsize))
+        throtletxt.grid(column = 2, row =2, sticky=tk.NS)
         throtlebar.grid(column = 1, row=2, sticky= tk.NS)
-        self.updatedata()
+
+
+
+        ###LAST THING IS CREATE PID OBJS
+
+        global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
+        ThrottlePos = PIDDATA(0, throtlebar, throtletxt, "%")
+        AbsoluteEngineLoad = PIDDATA(0, engineabsbar, engineabstxt, "%")
+
+
         
 class Page2(Page):
     def __init__(self, *args, **kwargs):
@@ -131,6 +189,12 @@ class PageSettings(Page):
         title = tk.Label(frame, text='test4')
         title.grid(column=0, row=0)
 
+class popup(tk.Frame):
+    def __init__(self, *args, **kwargs):
+        tk.Frame.__init__(self, *args, **kwargs)
+        test = tk.Label(self, text='hi')
+        test.grid(column=0, row=0)
+
 
 class MainView(tk.Frame):
 
@@ -145,6 +209,7 @@ class MainView(tk.Frame):
         p2 = Page2(self)
         p3 = Page3(self)
         p4 = PageSettings(self)
+        popupwindow = popup(self)
         p1.id='p1'
         p2.id='p2'
         p3.id='p3'
@@ -203,6 +268,7 @@ class MainView(tk.Frame):
         p2.grid(column=1, row=1, in_=container, sticky=tk.NW)
         p3.grid(column=1, row=1, in_=container, sticky=tk.NW)
         p4.grid(column=1, row=1, in_=container, sticky=tk.NW)
+        popupwindow.grid(column=1, row =1, in_=container, sticky = tk.NS)
 
         
         ###PACK THE BUTTONS FOR THE NAV###
@@ -216,6 +282,7 @@ class MainView(tk.Frame):
         
         ###OPEN PAGE ONE###
         p1.show()
+        popupwindow.lift()
 
 
 
@@ -224,6 +291,7 @@ root = tk.Tk()
 main = MainView(root)
 main.pack(side="top", fill="both", expand=True)
 root.wm_geometry("800x480")
+updateUIData()
 
 root.mainloop()
 
