@@ -30,6 +30,9 @@
 #                                                                      #
 ########################################################################
 
+
+
+###THE PROBLEM IS THE BYTES ARE SPLICED WRONG SO USE ECU OUT PUT TO GRAB THE RIGHT BYTES TO CONVERT
 import math
 import functools
 from utils import *
@@ -107,13 +110,19 @@ def percent_centered(messages):
 
 # -40 to 215 C
 def temp(messages):
-    d = messages[0].data[2:]
-    print('raw unit info: ' + str(d))
-    v = bytes_to_int(d)
-    print("INT FROM RAW: " + str(v))
+    #d = messages[0].data[2:]
+    #print('raw unit info: ' + str(d))
+    #v = bytes_to_int(d)
+    #print("INT FROM RAW: " + str(v))
 
-    v = v - 40
-    return Unit.Quantity(v, Unit.celsius) # non-multiplicative unit
+    #v = v - 40
+    # return Unit.Quantity(v, Unit.celsius) # non-multiplicative unit
+    ###MY OWN READ FUNCTION HERE
+    output = messages[0].data[0]
+    output = int(output) - 40
+    return  output
+
+
 
 # -128 to 128 mA
 def current_centered(messages):

@@ -16,6 +16,7 @@ import serial
 import time
 
 from protocols import *
+import  commands
 
 class OBDcom:
     def __call__(self, messages):
@@ -329,11 +330,11 @@ class OBDcom:
         return lines
 #only one usbcom device allowed with this program
 if osx and debug:
-    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '1')
+    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '6')
 elif debug:
-    com =OBDcom('/dev/ttyUSB0', 115200, None)
+    com =OBDcom('/dev/ttyUSB0', 115200, '6')
 if(debug):
-    print('data: ' + str(com.query(commands.__mode1__[04])))
+    print('data: ' + str(com.query(commands.getPID("INTAKE_TEMP"))))
 
 
 print('Setup Complete.')

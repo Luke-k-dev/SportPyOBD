@@ -2,10 +2,13 @@
 from  SportUI import *
 from  newobd import *
 import Tkinter as tk
+
 import ttk
 import commands
 global currentPage
 currentPage=1
+global UIINDEBUG
+UIINDEBUG= True
 ###SET UP OBD CONNECTION###
 com = None
 if osx:
@@ -14,6 +17,9 @@ if osx:
 else:
 
     com = OBDcom('/dev/ttyUSB0', 115200, '6') ###POROTCAL 6 FOR 2013 FRS
+
+###READ EG SETTINGS ETC
+Settings = settings()
 
 
 ###NOW LOAD IN UI DATA###
@@ -56,19 +62,32 @@ global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp,OilTem
 
 ###UPDATE DATA FUNCTIONS
 def updateUIData():
+    ###STORE ALL PID IN ARRAY FOR EASIER UPDATING WITH FOR LOOP
+    ###ALSO REDUCE DELAY FOR COM to .09 this will allow fast comunication and no overload and backup on obd que
     global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
 
-    ThrottlePos.changeValue(com(commands.getPID("THROTTLE_POS")))
-    AbsoluteEngineLoad.changeValue(com(commands.getPID("ENGINE_LOAD")))
+    ###CHECK PAGE BY PAGE FOR UPDATES B/C UPDATING ALL AT ONCE IS BAD AF
+    if(UIINDEBUG):
+        return
+    if currentPage == 1:
+        ThrottlePos.changeValue(com.query(commands.getPID("THROTTLE_POS")))
+        AbsoluteEngineLoad.changeValue(com.query(commands.getPID("ENGINE_LOAD")))
+        CoolantTemp.changeValue(com.query(commands.getPID("COOLANT_TEMP")))
+    if currentPage ==2:
+        pass
+    if currentPage ==3:
+        pass
+
+
+
     #print (com(commands.getPID("SPEED")))
     #print('updating data')
     checkforpopup()
-    root.after(1000, updateUIData)
+    root.after(5000, updateUIData)
 
 def checkforpopup():
     ###this will be called once every second
     #Pedal Dance Here
-
     pass
 ###UI CLASS HERE
 
@@ -104,7 +123,16 @@ class Page1(Page):
         #create the display here
 
         #0105 ENGINE COOLANT TEMP USE THIS TO DETECT PEDAL DANCE @ 174F
-
+        coolanttitle = tk.Label(frame, text='Coolant Temp: ', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                                 font=(ui.activeTheme.font, ui.activeTheme.fontsize))
+        coolanttitle.grid(column=0, row=4, sticky=tk.NE)
+        coolantbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
+        coolantbar['maximum'] = 25700
+        coolantbar['value'] = 200
+        coolanttxt = tk.Label(frame, text='0%', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                                font=(ui.activeTheme.font, ui.activeTheme.fontsize))
+        coolanttxt.grid(column=2, row=4, sticky=tk.NS)
+        coolantbar.grid(column=1, row=4, sticky=tk.NS)
         #bhp = MAF x 1.25
 
         #0106 FUEL TRIM %
@@ -147,7 +175,7 @@ class Page1(Page):
         global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
         ThrottlePos = PIDDATA(0, throtlebar, throtletxt, "%")
         AbsoluteEngineLoad = PIDDATA(0, engineabsbar, engineabstxt, "%")
-
+        CoolantTemp = PIDDATA(0, coolantbar, coolanttxt, 'DEG C')
 
         
 class Page2(Page):

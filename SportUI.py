@@ -1,6 +1,8 @@
 #THis is the ui class for the project here any ui mods can be made
-
+import  io as io
 #UI HOLDER CLASS
+
+
 class UI():
     themeOne = None
     themeTwo = None
@@ -22,7 +24,52 @@ class UI():
         self.activeTheme = css
 
 
+class settings():
+    def __init__(self):
+        ###just load from defult data and read files
+        self.PedalDancePopUp = True
+        self.ShowTurbo = False
+        self.BHPValue = 171
+        self.ZT60 = 6.3
+        print("SETTINGS LOADING NOW")
+        self.readsettingdata()
 
+    def str_to_bool(self, s):
+        ss = s
+        if ss.__contains__('T'):
+            return True
+        elif ss.__contains__("F"):
+            return False
+        else:
+            print ("PROBLEM WITH:" + str(s))
+            raise ValueError  # evil ValueError that doesn't tell you what the wrong value was
+
+    def removeLineEnding(self, strtouse):
+        strtouse = strtouse[:2]
+        print (strtouse)
+        return strtouse
+
+
+    def readsettingdata(self):
+        try:
+            print("read file....")
+            file = open('settings.txt', 'r')
+            data = file.readlines()
+            line=data[1]
+            self.PedalDancePopUp = self.str_to_bool(line[line.find('=')+1:])
+            print("Pedal Dance Pop Up: "+ str(self.PedalDancePopUp))
+            line = data[2]
+            self.ShowTurbo = self.str_to_bool(line[line.find('=')+1:])
+            print("Show Turbo: " + str(self.PedalDancePopUp))
+
+        except:
+            print("ERROR In settings.txt CHECK FILE FORMAT.")
+
+
+    def writesettingdata(self, var, varkey):
+        file = open('settings.txt', 'w')
+
+        pass
 
 #css class
 class css():
