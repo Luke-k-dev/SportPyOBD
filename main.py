@@ -2,7 +2,6 @@
 from  SportUI import *
 from  newobd import *
 import Tkinter as tk
-
 import ttk
 import commands
 global currentPage
@@ -19,6 +18,7 @@ else:
     com = OBDcom('/dev/ttyUSB0', 115200, '6') ###POROTCAL 6 FOR 2013 FRS
 
 ###READ EG SETTINGS ETC
+global Settings
 Settings = settings()
 
 
@@ -99,7 +99,6 @@ class Page(tk.Frame):
     def show(self):
         self.lift()
         global buttonNavList
-        x=4
         if buttonNavList !=None:
             for btn in buttonNavList:
                 btn['bg'] = ui.activeTheme.color3
@@ -121,52 +120,71 @@ class Page1(Page):
         frame = tk.Frame(self, bg = ui.activeTheme.color4)
         frame.pack(side="top", fill="both", expand=True)
         #create the display here
-
+        DisplayPos = 1
         #0105 ENGINE COOLANT TEMP USE THIS TO DETECT PEDAL DANCE @ 174F
         coolanttitle = tk.Label(frame, text='Coolant Temp: ', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                                  font=(ui.activeTheme.font, ui.activeTheme.fontsize))
-        coolanttitle.grid(column=0, row=4, sticky=tk.NE)
+        coolanttitle.grid(column=0, row=DisplayPos, sticky=tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
         coolantbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
-        coolantbar['maximum'] = 25700
-        coolantbar['value'] = 200
-        coolanttxt = tk.Label(frame, text='0%', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+        coolantbar['maximum'] = 300
+        coolantbar['value'] = 50
+        coolanttxt = tk.Label(frame, text='0 DEG C', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                                 font=(ui.activeTheme.font, ui.activeTheme.fontsize))
-        coolanttxt.grid(column=2, row=4, sticky=tk.NS)
-        coolantbar.grid(column=1, row=4, sticky=tk.NS)
-        #bhp = MAF x 1.25
+        coolanttxt.grid(column=2, row=DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+        coolantbar.grid(column=1, row=DisplayPos, sticky=tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
 
+        DisplayPos=2
         #0106 FUEL TRIM %
-        
+
+
+        DisplayPos=3
         #0110 MAF SENSOR FOR AIR FLOW
 
+        DisplayPos=4
         #0143 ABSOLUTE ENGINE LOAD
         engineabstitle = tk.Label(frame, text='Engine Load: ', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                                 font=(ui.activeTheme.font, ui.activeTheme.fontsize))
-        engineabstitle.grid(column=0, row=3, sticky=tk.NE)
+        engineabstitle.grid(column=0, row=DisplayPos, sticky=tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
         engineabsbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
         engineabsbar['maximum'] = 25700
         engineabsbar['value'] = 200
         engineabstxt = tk.Label(frame, text='0%', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                               font=(ui.activeTheme.font, ui.activeTheme.fontsize))
-        engineabstxt.grid(column=2, row=3, sticky=tk.NS)
-        engineabsbar.grid(column=1, row=3, sticky=tk.NS)
-        #015C ENGINE OIL TEMP
+        engineabstxt.grid(column=2, row=DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+        engineabsbar.grid(column=1, row=DisplayPos, sticky=tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
 
+        DisplayPos=5
+        #015C ENGINE OIL TEMP
+        oiltitle = tk.Label(frame, text='Oil Temp: ', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                                font=(ui.activeTheme.font, ui.activeTheme.fontsize))
+        oiltitle.grid(column=0, row=DisplayPos, sticky=tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+        oilbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
+        oilbar['maximum'] = 300
+        oilbar['value'] = 10
+        oiltxt = tk.Label(frame, text='0 DEG C', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                              font=(ui.activeTheme.font, ui.activeTheme.fontsize))
+        oiltxt.grid(column=2, row=DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+        oilbar.grid(column=1, row=DisplayPos, sticky=tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+
+        DisplayPos=6
         #015E ENGINE FUEL RATE LITERS/HR
 
+        DisplayPos=7
         #0162 ENGINE TQ
 
+        DisplayPos=8
         #0168 INTAKE AIR TEMP
 
+        DisplayPos=9
         #throttle pos PID: 0111
         throtletitle = tk.Label(frame, text='Throttle Pos: ', bg=ui.activeTheme.color4, fg = ui.activeTheme.color1, font =(ui.activeTheme.font, ui.activeTheme.fontsize))
-        throtletitle.grid(column =0, row=2, sticky= tk.NE)
+        throtletitle.grid(column =0, row=DisplayPos, sticky= tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
         throtlebar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
         throtlebar['maximum'] = 100
         throtlebar['value'] = 10
         throtletxt= tk.Label(frame, text='0%', bg=ui.activeTheme.color4, fg = ui.activeTheme.color1, font =(ui.activeTheme.font, ui.activeTheme.fontsize))
-        throtletxt.grid(column = 2, row =2, sticky=tk.NS)
-        throtlebar.grid(column = 1, row=2, sticky= tk.NS)
+        throtletxt.grid(column = 2, row =DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+        throtlebar.grid(column = 1, row=DisplayPos, sticky= tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
 
 
 
@@ -176,6 +194,7 @@ class Page1(Page):
         ThrottlePos = PIDDATA(0, throtlebar, throtletxt, "%")
         AbsoluteEngineLoad = PIDDATA(0, engineabsbar, engineabstxt, "%")
         CoolantTemp = PIDDATA(0, coolantbar, coolanttxt, 'DEG C')
+        OilTemp = PIDDATA(0, oilbar, oiltxt, 'DEG C')
 
         
 class Page2(Page):
@@ -189,8 +208,6 @@ class Page2(Page):
 
          #0110 MAF SENSOR FOR AIR FLOW
 
-         #BHP (STATIC VALUE)
-
          #0143 ABSOLUTE ENGINE LOAD
 
          #0105 ENGINE COOLANT TEMP USE THIS TO DETECT PEDAL DANCE @ 174F this is in C
@@ -198,6 +215,8 @@ class Page2(Page):
          #015C ENGINE OIL TEMP
 
          #0168 INTAKE AIR TEMP
+
+         # bhp = MAF x 1.25
 
 
 class Page3(Page):
@@ -214,14 +233,92 @@ class PageSettings(Page):
         Page.__init__(self, *args, **kwargs)
         frame = tk.Frame(self)
         frame.pack(side="top", fill="both", expand=True)
-        title = tk.Label(frame, text='test4')
-        title.grid(column=0, row=0)
+        frame.config(bg=ui.activeTheme.color4)
+        title = tk.Label(frame, text='Settings', bg =ui.activeTheme.color4, fg=ui.activeTheme.color1, font= (ui.activeTheme.font, int(ui.activeTheme.fontsize*1.5)))
+        title.grid(column=0, row=0, sticky= tk.NW, pady=20)
+
+        ###PEDAL DANCE CTRL HERE###
+        showpedaltxt=tk.Label(frame, text='Show Track Pop-Up', bg =ui.activeTheme.color4, fg=ui.activeTheme.color1, font= (ui.activeTheme.font, int(ui.activeTheme.fontsize)))
+        showpedaltxt.grid(column=0, row=1, sticky=tk.NE)
+        showpedalbtn= toggle(frame)
+        showpedalbtn.grid(column = 2, row=1, sticky= tk.NS)
+        showpedalbtn.load('PedalDancePopUp')
+
+        ###PEDAL DANCE CTRL HERE###
+        showpedaltxt = tk.Label(frame, text='Show Turbo Info', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                                font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
+        showpedaltxt.grid(column=0, row=2, sticky=tk.NE)
+        showpedalbtn = toggle(frame)
+        showpedalbtn.grid(column=2, row=2, sticky=tk.NS)
+        showpedalbtn.load('ShowTurbo')
+
+
+
+
+        ###SPACE COL 1###
+        spacer = tk.Label(frame, text="                             ", bg=ui.activeTheme.color4)
+        spacer.grid(column=1, row=0)
+
+class toggle(tk.Button):
+    global Settings
+    def __init__(self, *args, **kwargs):
+        tk.Button.__init__(self, *args, **kwargs)
+        self['command']= self.clickit
+        ###STYLES LOADED IN HERE IN CLASS INIT
+        self.configure(borderwidth = 0, highlightthickness=0, fg= ui.activeTheme.color1, pady=10, font = (ui.activeTheme.font, int(ui.activeTheme.fontsize* .5), 'bold'))
+        self.enabled= False
+        self['text'] = 'OFF'
+    def clickit(self):
+        if(self.enabled):
+            self.enabled=False
+            self['text']='OFF'
+        else:
+            self.enabled = True
+            self['text'] = 'ON'
+        #print (str(self.enabled))
+
+    def seton(self):
+        self.enabled=True
+        self['text'] = 'ON'
+
+    def setoff(self):
+        self.enabled=False
+        self['text'] = 'OFF'
+    def load(self, settingkey):
+        if settingkey=="PedalDancePopUp":
+            if(Settings.PedalDancePopUp):
+                self.seton()
+            else:
+                self.setoff()
+        ###REPEAT STRUCTURE FOR OTHER TOGGLES
+        if settingkey=="ShowTurbo":
+            if(Settings.ShowTurbo):
+                self.seton()
+            else:
+                self.setoff()
+        ###REPEAT STRUCTURE FOR OTHER TOGGLES
+
+
+
+
 
 class popup(tk.Frame):
     def __init__(self, *args, **kwargs):
         tk.Frame.__init__(self, *args, **kwargs)
-        test = tk.Label(self, text='hi')
-        test.grid(column=0, row=0)
+        self.config(bg=ui.activeTheme.color4)
+        self.pdancetxt='TRACK MODE\nREADY\n'+u"\u26A0"
+        self.coldwarning = 'ENGINE\nCOLD\n' + u"\u26A0"
+        self.txt = tk.Label(self, text="", bg=ui.activeTheme.color4, fg= ui.activeTheme.alertcolor, font= (ui.activeTheme.fontsize,90))
+        self.txt.pack()
+    def show(self, displayset):
+        if displayset=='PEDAL':
+            self.txt['text'] = self.pdancetxt
+        elif displayset =='ENGINECOLD':
+            self.txt['text'] = self.coldwarning
+        elif displayset == "OILTEMP":
+            pass
+
+
 
 
 class MainView(tk.Frame):
@@ -230,6 +327,8 @@ class MainView(tk.Frame):
         global buttonNavList
         ###SOME INI SETUP CODE###
         tk.Frame.__init__(self, *args, **kwargs)
+
+
 
         
         
@@ -296,7 +395,7 @@ class MainView(tk.Frame):
         p2.grid(column=1, row=1, in_=container, sticky=tk.NW)
         p3.grid(column=1, row=1, in_=container, sticky=tk.NW)
         p4.grid(column=1, row=1, in_=container, sticky=tk.NW)
-        popupwindow.grid(column=1, row =1, in_=container, sticky = tk.NS)
+        popupwindow.grid(column=1, row =1, in_=container, sticky = tk.NSEW)
 
         
         ###PACK THE BUTTONS FOR THE NAV###
@@ -310,7 +409,11 @@ class MainView(tk.Frame):
         
         ###OPEN PAGE ONE###
         p1.show()
-        popupwindow.lift()
+
+
+        ###DEBUGPOPUP###
+
+
 
 
 
@@ -320,7 +423,6 @@ main = MainView(root)
 main.pack(side="top", fill="both", expand=True)
 root.wm_geometry("800x480")
 updateUIData()
-
 root.mainloop()
 
 

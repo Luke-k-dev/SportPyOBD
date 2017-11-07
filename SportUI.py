@@ -31,6 +31,7 @@ class settings():
         self.ShowTurbo = False
         self.BHPValue = 171
         self.ZT60 = 6.3
+
         print("SETTINGS LOADING NOW")
         self.readsettingdata()
 
@@ -61,15 +62,35 @@ class settings():
             line = data[2]
             self.ShowTurbo = self.str_to_bool(line[line.find('=')+1:])
             print("Show Turbo: " + str(self.PedalDancePopUp))
+            line = data[3]
+            self.BHPValue = int(line[line.find('=') + 1:])
+            print("BHP: " + str(self.BHPValue))
+            line = data[4]
+            self.ZT60 = float(line[line.find('=') + 1:])
+            print("BHP: " + str(self.ZT60))
+
+
 
         except:
             print("ERROR In settings.txt CHECK FILE FORMAT.")
+        file.close()
 
-
-    def writesettingdata(self, var, varkey):
+    def getStringFromBool(self, booleanvalue):
+        if(booleanvalue):
+            return "T"
+        return "F"
+    def saveSettings(self):
         file = open('settings.txt', 'w')
+        file.close()
+        file = open('settings.txt', 'w')
+        datatowrite = "THIS IS SETTING DATA NO SPACES AND CASE SENSITIVE [SAVED]\n"
+        datatowrite +="PedalDancePopUp="+self.getStringFromBool(self.PedalDancePopUp)+'\n'
+        datatowrite += "ShowTurbo=" + self.getStringFromBool(self.ShowTurbo) + '\n'
+        datatowrite += "BHPValue=" + str(self.BHPValue) + '\n'
+        datatowrite += "ZT60=" + str(self.ZT60) + '\n'
+        file.write(datatowrite)
+        file.close()
 
-        pass
 
 #css class
 class css():
@@ -85,8 +106,11 @@ class css():
         self.color2 = c2
         self.color3 = c3
         self.color4 = c4
+        self.alertcolor = 'yellow'
         self.font = font
         self.fontsize = fontsize
+        self.padx = 5
+        self.pady = 10
     def __str__(self):
         return "COLORS: " +self.color1 + ' '+self.color2 + ' '+self.color3 + ' '+self.color4 + ' FONT:' + self.font +" FONT-SIZE: " + str(self.fontsize)
 
