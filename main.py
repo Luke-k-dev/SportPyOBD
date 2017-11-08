@@ -28,9 +28,9 @@ Settings = settings()
 # theme 1
 t1 = css("#f47142", "#493030", "#332a23", "#303030", "Helvetica", 20)
 # theme 2
-t2 = css("#FFF", "#FFF", "#FFF", "#FFF", "Helvetica", 16)
+t2 = css("#382", "#233", "#FFF", "#FFF", "Helvetica", 20)
 # theme 3
-t3 = css("#FFF", "#FFF", "#FFF", "#FFF", "Helvetica", 16)
+t3 = css("#283334", "#343334", "#333344", "#FF333F", "Helvetica", 20)
 
 
 ui = UI(t1, t2, t3)
@@ -116,6 +116,7 @@ class Page1(Page):
 
 
     def __init__(self, *args, **kwargs):
+        global ui
         Page.__init__(self, *args, **kwargs)
         frame = tk.Frame(self, bg = ui.activeTheme.color4)
         frame.pack(side="top", fill="both", expand=True)
@@ -199,6 +200,7 @@ class Page1(Page):
         
 class Page2(Page):
     def __init__(self, *args, **kwargs):
+         global ui
          Page.__init__(self, *args, **kwargs)
          frame = tk.Frame(self, bg = ui.activeTheme.color4)
          frame.pack(side="top", fill="both", expand=True)
@@ -230,6 +232,7 @@ class Page3(Page):
 
 class PageSettings(Page):
     def __init__(self, *args, **kwargs):
+        global ui
         Page.__init__(self, *args, **kwargs)
         frame = tk.Frame(self)
         frame.pack(side="top", fill="both", expand=True)
@@ -238,34 +241,136 @@ class PageSettings(Page):
         title.grid(column=0, row=0, sticky= tk.NW, pady=20)
 
         ###PEDAL DANCE CTRL HERE###
-        showpedaltxt=tk.Label(frame, text='Show Track Pop-Up', bg =ui.activeTheme.color4, fg=ui.activeTheme.color1, font= (ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        showpedaltxt.grid(column=0, row=1, sticky=tk.NE)
+        showpedaltxt=tk.Label(frame, text='Show Track Pop-Up:', bg =ui.activeTheme.color4, fg=ui.activeTheme.color1, font= (ui.activeTheme.font, int(ui.activeTheme.fontsize)))
+        showpedaltxt.grid(column=0, row=1, sticky=tk.E)
         showpedalbtn= toggle(frame)
         showpedalbtn.grid(column = 2, row=1, sticky= tk.NS)
         showpedalbtn.load('PedalDancePopUp')
 
         ###PEDAL DANCE CTRL HERE###
-        showpedaltxt = tk.Label(frame, text='Show Turbo Info', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+        showpedaltxt = tk.Label(frame, text='Show Turbo Info:', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                                 font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        showpedaltxt.grid(column=0, row=2, sticky=tk.NE)
+        showpedaltxt.grid(column=0, row=2, sticky=tk.E)
         showpedalbtn = toggle(frame)
         showpedalbtn.grid(column=2, row=2, sticky=tk.NS)
         showpedalbtn.load('ShowTurbo')
 
+        ###THEME BUTTONS HERE
+        themetitle = tk.Label(frame, text='Theme:',bg=ui.activeTheme.color4, fg=ui.activeTheme.color1, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
+        themetitle.grid(column=0, row=3, sticky= tk.E)
+        ###THEME SELECT BUTTONS WILL USE COL 1 LIKE THE SPACER
+        nxt = themeclicker(frame)
+        nxt.load(1)
+        nxt.grid(column=1, row=3, sticky=tk.NE, padx= 10)
+
+        themeid = themeLabel(frame)
+        themeid.grid(column =1, row=3, sticky = tk.NS)
+
+        prev = themeclicker(frame)
+        prev.load(-1)
+        prev.grid(column=1, row=3, sticky=tk.NW, padx=10)
+
+        ###CALIBRATE BUTTONS HERE###
 
 
 
         ###SPACE COL 1###
-        spacer = tk.Label(frame, text="                             ", bg=ui.activeTheme.color4)
-        spacer.grid(column=1, row=0)
+        spacer = tk.Label(frame, text=" ", bg=ui.activeTheme.color4)
+        spacer.grid(column=1, row=0,padx=250)
+class themeLabel(tk.Label):
+    global ui
+    themeList = [ui.themeOne, ui.themeTwo, ui.themeThree]
+    def findtheme(self):
+        global themeList
+        ct=0
+        for t in themeList:
+            if(t.color1 == ui.activeTheme.color1 and t.color2 == ui.activeTheme.color2 and t.color3 == ui.activeTheme.color3):
+                print('theme id = '+str(ct))
+                return ct
+            if(ct>2):
+                return 2
+            ct= ct+1
+
+    def __init__(self, *args, **kwargs):
+        tk.Label.__init__(self, *args, **kwargs)
+        t = self.findtheme() +1
+        txt= 'Theme '+ str(t)
+        self.configure( text=txt, bg =ui.activeTheme.color4, fg=ui.activeTheme.color1, font= (ui.activeTheme.font, int(ui.activeTheme.fontsize)))
+
+
+
+class themeclicker(tk.Button):
+    global ui
+    global themeList
+    themeList = [ui.themeOne, ui.themeTwo, ui.themeThree]
+    ###NEVER PASS STYLES WHEN CREATING OBJECT INSTACE MODIFY THISS CLASS DIRECTLY OR DUPLICATE AND MODIFY
+    def __init__(self, *args, **kwargs):
+        global ui
+        tk.Button.__init__(self, *args, **kwargs)
+        self['command'] = self.clickit
+        ###STYLES LOADED IN HERE IN CLASS INIT
+        self.ThemeID= 0
+        self.configure(borderwidth=0, highlightthickness=0, fg=ui.activeTheme.color1, pady=10,
+                       font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .5), 'bold'), width=12)
+
+
+    def findtheme(self):
+        global themeList
+        ct=0
+        for t in themeList:
+            if(t.color1 == ui.activeTheme.color1 and t.color2 == ui.activeTheme.color2 and t.color3 == ui.activeTheme.color3):
+                print('theme id = '+str(ct))
+                return ct
+            if(ct>2):
+                return 2
+            ct= ct+1
+
+
+    def clickit(self):
+        global themeList
+        if(self.mode):
+            ###ADD TO THEME COUNT
+            ltheme= self.findtheme()
+            if(ltheme< 2):
+                ltheme=ltheme+1
+                ui.changetheme(themeList[ltheme])
+                print (ui.activeTheme)
+                reloadui()
+            else:
+                print("NO MORE THEMES")
+
+
+        else:
+            ###SUBTRACT
+            ltheme = self.findtheme()
+            if (ltheme > 0):
+                ltheme = ltheme - 1
+                ui.changetheme(themeList[ltheme])
+                print (ui.activeTheme)
+                reloadui()
+            else:
+                print("NO MORE THEMES")
+
+
+    def load(self, intposormin):
+        if(intposormin > 0):
+            self.mode=True
+            self['text'] ="Next"
+        else:
+            self.mode = False
+            self['text'] ="Prev"
+
+
 
 class toggle(tk.Button):
     global Settings
+    global ui
+    ###NEVER PASS STYLES WHEN CREATING OBJECT INSTACE MODIFY THISS CLASS DIRECTLY OR DUPLICATE AND MODIFY
     def __init__(self, *args, **kwargs):
         tk.Button.__init__(self, *args, **kwargs)
         self['command']= self.clickit
         ###STYLES LOADED IN HERE IN CLASS INIT
-        self.configure(borderwidth = 0, highlightthickness=0, fg= ui.activeTheme.color1, pady=10, font = (ui.activeTheme.font, int(ui.activeTheme.fontsize* .5), 'bold'))
+        self.configure(borderwidth = 0, highlightthickness=0, fg= ui.activeTheme.color1, pady=10, font = (ui.activeTheme.font, int(ui.activeTheme.fontsize* .5), 'bold'), width=12)
         self.enabled= False
         self['text'] = 'OFF'
     def clickit(self):
@@ -303,7 +408,9 @@ class toggle(tk.Button):
 
 
 class popup(tk.Frame):
+
     def __init__(self, *args, **kwargs):
+        global ui
         tk.Frame.__init__(self, *args, **kwargs)
         self.config(bg=ui.activeTheme.color4)
         self.pdancetxt='TRACK MODE\nREADY\n'+u"\u26A0"
@@ -322,8 +429,14 @@ class popup(tk.Frame):
 
 
 class MainView(tk.Frame):
+    global p4
+    def loadsettings(self):
+        global p4
+        p4.show()
 
     def __init__(self, *args, **kwargs):
+        global p4
+        global ui
         global buttonNavList
         ###SOME INI SETUP CODE###
         tk.Frame.__init__(self, *args, **kwargs)
@@ -416,10 +529,22 @@ class MainView(tk.Frame):
 
 
 
-
+global main, root
 root = tk.Tk()
 
 main = MainView(root)
+
+def reloadui():
+    global main, root
+    root.destroy()
+    root = tk.Tk()
+    main =MainView(root)
+    main.pack(side="top", fill="both", expand=True)
+    root.wm_geometry("800x480")
+    updateUIData()
+    main.loadsettings()
+    root.mainloop()
+
 main.pack(side="top", fill="both", expand=True)
 root.wm_geometry("800x480")
 updateUIData()

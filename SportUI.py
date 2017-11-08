@@ -10,7 +10,7 @@ class UI():
     activetheme= None
     def __init__(self, css1, css2, css3):
 
-
+        print("UI THEMES:")
         print (css1)
         print (css2)
         print (css3)
@@ -123,11 +123,9 @@ if(testui):
     t1 = css("#FFF", "#FFF", "#FFF", "#FFF", "Helvetica", "16")
     t2 = css("#FFF", "#FFF", "#FFF", "#FFF", "Helvetica", "17")
     t3 = css("#FFF", "#FFF", "#FFF", "#FFF", "Helvetica", "18")
-    tab1 = ['010C', '010F', '0167', '010B', '0004']
-    tab2 = ['0100', '0100', '0100', '0100', '0100']
-    tab3 = ['0100', '0100', '0100', '0100', '0100']
 
 
-    ui = UI(t1,t2,t3, d)
+
+    ui = UI(t1,t2,t3)
 
 
