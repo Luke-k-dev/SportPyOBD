@@ -109,7 +109,7 @@ def updateUIData():
     root.after(5000, updateUIData)
 
 def checkforpopup():
-    ###this will be called once every second
+    ###this will be called right after the ui updates data perhaps even in the same frame
     #Pedal Dance Here
     pass
 ###UI CLASS HERE
@@ -328,17 +328,23 @@ class PageSettings(Page):
         prev.grid(column=1, row=3, sticky=tk.NW, padx=90)
 
 
-
-        ###CALIBRATE BUTTONS HERE###
+        divider= tk.Label(frame, text='Stats:', background = ui.activeTheme.color4, fg=ui.activeTheme.color1,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize *1.35)))
+        divider.grid(column=0, row=4, pady=25)
+        ###STATS HERE###
+        #0 to 60
         ZT60title = tk.Label(frame, text= "Zero to 60: ",bg=ui.activeTheme.color4, fg=ui.activeTheme.color1, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        ZT60title.grid(column=0, row =4, sticky = tk.NE)
+        ZT60title.grid(column=0, row =5, sticky = tk.NE)
         ZT60value = tk.Label(frame, text="6.31", bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                              font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        ZT60value.grid(column=1, row=4, sticky=tk.NW)
-        #ZT60cal = tk.button()
+        ZT60value.grid(column=1, row=5, sticky=tk.NW)
+        ZT60cal = tk.Button(frame, text='0-60 Pull')#need styling
+        ZT60cal.grid(column=2, row =5)
 
+        #hp
 
+        #ODO
 
+        #TQ
 
         ###SPACE COL 1###
         spacer = tk.Label(frame, text=" ", bg=ui.activeTheme.color4)
@@ -626,7 +632,7 @@ root.mainloop()
 
 # style.configure("RPM.Horizontal.TProgressbar", thickness=48, background=ui.themeOne.color2, fieldbackground='black')
 
-# root.attributes("-fullscreen", True) for full screen displau
+# root.attributes("-fullscreen", True) for full screen display
 # root.configure(background=ui.themeOne.color4)
 # root2 = Tk()  # remove anyhting here with a 2 to disable the sim
 # app = Application(master=root)
