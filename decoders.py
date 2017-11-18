@@ -99,7 +99,9 @@ def percent(messages):
     d = messages[0].data[2:]
     v = d[0]
     v = v * 100.0 / 255.0
-    return v * Unit.percent
+    #return v * Unit.percent
+    return messages[0].data[0]
+
 
 # -100 to 100 %
 def percent_centered(messages):

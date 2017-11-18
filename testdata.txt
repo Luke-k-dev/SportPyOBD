@@ -1,0 +1,49 @@
+
+
+
+*****************
+THROTTLE_POS
+--------------
+0 seconds: None
+2 seconds: None
+4 seconds: None
+6 seconds: None
+8 seconds: None
+10 seconds: None
+
+ENGINE_LOAD
+--------------
+0 seconds: None
+2 seconds: None
+4 seconds: None
+6 seconds: None
+8 seconds: None
+10 seconds: None
+
+COOLANT_TEMP
+--------------
+0 seconds: None
+2 seconds: None
+4 seconds: None
+6 seconds: None
+8 seconds: None
+10 seconds: None
+
+COOLANT_TEMP
+--------------
+0 seconds: None
+2 seconds: None
+4 seconds: None
+6 seconds: None
+8 seconds: None
+10 seconds: None
+
+COOLANT_TEMP
+--------------
+0 seconds: None
+2 seconds: None
+4 seconds: None
+6 seconds: None
+8 seconds: None
+10 seconds: None
+

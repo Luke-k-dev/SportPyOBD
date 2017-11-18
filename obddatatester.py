@@ -1,8 +1,17 @@
 from  newobd import *
 global com
+#config here
 osx= True
+highseria=True
+sleeptime=2
+
+
 if osx:
-    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '6')
+    if highseria:
+        com = OBDcom('/dev/tty.usbserial-00002014', 115200, '6')
+    else:
+        com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '6')
+
 else:
     com =OBDcom('/dev/ttyUSB0', 115200, '6')
 if(debug):
@@ -10,27 +19,91 @@ if(debug):
 
 
 print('Setup Complete.')
+
+
+#class for data storage
+class datatype():
+
+    def __init__(self, pid):
+        self.PID = pid
+        self.data=[]
+    def update(self):
+        temp = str(com.query(commands.getPID(self.PID)))
+        self.data.append(temp)
+        print('PID: '+self.PID+"     DATA: "+temp)
+    def output(self):
+        outstr=self.PID+'\n--------------\n'
+        pt=0
+        for s in self.data:
+            outstr += str(pt*sleeptime)+' seconds'+': '+ self.data[pt]+'\n'
+
+
+            pt=pt+1
+        return outstr
+
+
+
+
+
+
 #get data
-def prindata():
-    data1='THROTTLE_POS'
-    data2='ENGINE_LOAD'
-    data3='COOLANT_TEMP'
-    data4='COOLANT_TEMP'
-    data5='COOLANT_TEMP'
+data1=datatype('THROTTLE_POS')
+data2=datatype('ENGINE_LOAD')
+data3=datatype('COOLANT_TEMP')
+data4=datatype('COOLANT_TEMP')
+data5=datatype('COOLANT_TEMP')
+dataarr =[data1,data2,data3,data4,data5]
+def getdata():
+    for d in dataarr:
+        d.update()
 
-    print(data1+": "+ str(com.query(commands.getPID(data1))))
-    print(data2+": "+ str(com.query(commands.getPID(data2))))
-    print(data3+": "+ str(com.query(commands.getPID(data3))))
-    print(data4+": "+ str(com.query(commands.getPID(data4))))
-    print(data5+": "+ str(com.query(commands.getPID(data5))))
 
-prindata()
-time.sleep(2)
-prindata()
-time.sleep(2)
-prindata()
-time.sleep(2)
-prindata()
-time.sleep(2)
-prindata()
-time.sleep(2)
+
+print("GETTING RAW DATA")
+print"RAW\n-----------------"
+
+getdata()
+time.sleep(sleeptime)
+getdata()
+time.sleep(sleeptime)
+getdata()
+time.sleep(sleeptime)
+getdata()
+time.sleep(sleeptime)
+getdata()
+time.sleep(sleeptime)
+getdata()
+time.sleep(sleeptime)
+
+
+
+
+header='DATA FROM TEST ID 0001\n-----------------\n'
+
+
+
+print (header)
+print(data1.output())
+print(data2.output())
+print(data3.output())
+print(data4.output())
+print(data5.output())
+print('record data to file?(y/n)')
+yn = raw_input("Y/N:")
+if yn.capitalize()=="Y":
+    yn=True
+else:
+    yn=False
+
+if yn:
+    print ("write to file")
+    file = open('testdata.txt', 'a')
+    file.write('\n\n\n*****************\n')
+    for a in dataarr:
+        file.write(a.output()+"\n")
+    file.flush()
+    file.close()
+    print('done')
+else:
+    print('Skip file write')
+
