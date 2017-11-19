@@ -64,6 +64,8 @@ class OBDCommand():
                           self.decode,
                           self.ecu,
                           self.fast)
+    def getDescription(self):
+        return str(self.desc)
 
     @property
     def mode(self):

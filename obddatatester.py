@@ -14,9 +14,6 @@ if osx:
 
 else:
     com =OBDcom('/dev/ttyUSB0', 115200, '6')
-if(debug):
-    print('data: ' + str(com.query(commands.getPID("INTAKE_TEMP"))))
-
 
 print('Setup Complete.')
 
@@ -27,6 +24,7 @@ class datatype():
     def __init__(self, pid):
         self.PID = pid
         self.data=[]
+        print("registered :"+self.PID)
     def update(self):
         temp = str(com.query(commands.getPID(self.PID)))
         self.data.append(temp)
@@ -79,10 +77,17 @@ time.sleep(sleeptime)
 
 
 header='DATA FROM TEST ID 0001\n-----------------\n'
-
+key='DATA KEY\n-------------\n'
+for k in dataarr:
+    d=''
+    d=d+str(commands.getPID(k.PID).getDescription())
+    print(d)
+    pi =str(k.PID)
+    key+= pi +": " + d +"\n"
 
 
 print (header)
+print(key)
 print(data1.output())
 print(data2.output())
 print(data3.output())
@@ -99,11 +104,16 @@ if yn:
     print ("write to file")
     file = open('testdata.txt', 'a')
     file.write('\n\n\n*****************\n')
+    file.write(key)
     for a in dataarr:
         file.write(a.output()+"\n")
+    print('data in buffer preparing to flush')
     file.flush()
+    print('data has been flushed')
     file.close()
     print('done')
 else:
     print('Skip file write')
+
+
 
