@@ -52,6 +52,12 @@ def getPID(NAME):
     for command in __mode1__:
         if command.name == NAME:
             return command
+    for command in __mode9__:
+        if command.name == NAME:
+            return command
+    for command in __misc__:
+        if command.name == NAME:
+            return command
 
 
 __mode1__ = [
@@ -152,10 +158,11 @@ __mode1__ = [
     OBDCommand("FUEL_RAIL_PRESSURE_ABS"     , "Fuel rail pressure (absolute)"           , b"0159", 4, uas(0x1B),             ECU.ENGINE, True),
     OBDCommand("RELATIVE_ACCEL_POS"         , "Relative accelerator pedal position"     , b"015A", 3, percent,               ECU.ENGINE, True),
     OBDCommand("HYBRID_BATTERY_REMAINING"   , "Hybrid battery pack remaining life"      , b"015B", 3, percent,               ECU.ENGINE, True),
-    OBDCommand("OIL_TEMP"                   , "Engine oil temperature"                  , b"015C", 3, temp,                  ECU.ENGINE, True),
+    OBDCommand("OIL_TEMP"                   , "Engine oil temperature"                  , b"015c", 3, temp,                  ECU.ENGINE, True),
     OBDCommand("FUEL_INJECT_TIMING"         , "Fuel injection timing"                   , b"015D", 4, inject_timing,         ECU.ENGINE, True),
     OBDCommand("FUEL_RATE"                  , "Engine fuel rate"                        , b"015E", 4, fuel_rate,             ECU.ENGINE, True),
     OBDCommand("EMISSION_REQ"               , "Designed emission requirements"          , b"015F", 3, drop,                  ECU.ENGINE, True),
+
 ]
 
 
@@ -294,13 +301,14 @@ __mode9__ = [
     #                      name                             description                    cmd  bytes       decoder           ECU        fast
     # OBDCommand("PIDS_9A"                    , "Supported PIDs [01-20]"                  , b"0900", 4, pid,                   ECU.ENGINE,  True),
     # OBDCommand("VIN_MESSAGE_COUNT"          , "VIN Message Count"                       , b"0901", 1, uas(0x01),             ECU.ENGINE,  True),
-    OBDCommand("VIN"                        , "Get Vehicle Identification Number"       , b"0902", 20, raw_string,           ECU.ENGINE,  True),
+    OBDCommand("VIN"                        , "Get Vehicle Identification Number"       , b"0902", 20, vin,           ECU.ENGINE,  True),
 ]
 
 __misc__ = [
     #                      name                             description                    cmd  bytes       decoder           ECU        fast
     OBDCommand("ELM_VERSION"                , "ELM327 version string"                   , b"ATI",  0, raw_string,            ECU.UNKNOWN, False),
     OBDCommand("ELM_VOLTAGE"                , "Voltage detected by OBD-II adapter"      , b"ATRV", 0, elm_voltage,           ECU.UNKNOWN, False),
+    OBDCommand("FRS_OIL_TEMP"                , "Non standard frs oil temp PID"          , b"2101", 31, frsoil,           ECU.ENGINE, False),
 ]
 
 

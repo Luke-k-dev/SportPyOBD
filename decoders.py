@@ -63,6 +63,12 @@ def drop(messages):
 def noop(messages):
     return messages[0].data
 
+def frsoil(messages):
+
+    print('decode frs oil')
+    m=messages[0]
+    #boom we can now read frs oil temp
+    return int(m.data[28]) - 40
 
 # hex in, bitstring out
 def pid(messages):
@@ -83,6 +89,8 @@ Unit/Scaling in that table, simply to avoid redundant code.
 def uas(id):
     """ get the corresponding decoder for this UAS ID """
     return functools.partial(decode_uas, id=id)
+
+
 
 def decode_uas(messages, id):
     d = messages[0].data[2:] # chop off mode and PID bytes
@@ -397,6 +405,14 @@ def single_dtc(messages):
     """ parses a single DTC from a message """
     d = messages[0].data[2:]
     return parse_dtc(d)
+
+def vin(messages):
+    output=''
+    for m in messages:
+        output+=m.raw()
+    return output
+
+
 
 
 def dtc(messages):

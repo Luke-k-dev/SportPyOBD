@@ -3,7 +3,7 @@ global com
 #config here
 osx= True
 highseria=True
-sleeptime=2
+sleeptime=1
 
 
 if osx:
@@ -48,9 +48,11 @@ class datatype():
 data1=datatype('THROTTLE_POS')
 data2=datatype('ENGINE_LOAD')
 data3=datatype('COOLANT_TEMP')
-data4=datatype('COOLANT_TEMP')
-data5=datatype('COOLANT_TEMP')
+data4=datatype('FRS_OIL_TEMP')
+data5=datatype('VIN')
 dataarr =[data1,data2,data3,data4,data5]
+dataarr=[data4]
+
 def getdata():
     for d in dataarr:
         d.update()
@@ -103,7 +105,7 @@ else:
 if yn:
     print ("write to file")
     file = open('testdata.txt', 'a')
-    file.write('\n\n\n*****************\n')
+    file.write('\n******NEW TEST HERE*******\n')
     file.write(key)
     for a in dataarr:
         file.write(a.output()+"\n")

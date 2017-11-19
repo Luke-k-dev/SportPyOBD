@@ -101,7 +101,18 @@ class OBDcom:
 
         # ------------------------- ATH1 (headers ON) -------------------------
         r = self.__send(b"ATH1")
-        
+
+
+
+
+        ### SET HEADER THIS MAY BREAK IT########
+        r = self.__send(b"AT SH 7E0")
+
+
+
+
+
+
 
         # ------------------------ ATL0 (linefeeds OFF) -----------------------
         r = self.__send(b"ATL0")
@@ -266,6 +277,7 @@ class OBDcom:
 
         # send command and retrieve message
         cmd_string = self.__build_command_string(cmd)
+
         messages = self.send_and_parse(cmd_string)
 
 
