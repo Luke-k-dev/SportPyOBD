@@ -281,8 +281,10 @@ class OBDcom:
         messages = self.send_and_parse(cmd_string)
 
 
-
-        return cmd(messages)  # compute a response object
+        ot=cmd(messages)  # compute a response object
+        print(ot)
+        ot=str(ot)
+        return ot
 
     def __build_command_string(self, cmd):
         """ assembles the appropriate command string """

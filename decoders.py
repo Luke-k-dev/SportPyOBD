@@ -408,9 +408,19 @@ def single_dtc(messages):
 
 def vin(messages):
     output=''
-    for m in messages:
-        output+=m.raw()
-    return output
+    print("GET VIN")
+    #not quite perfect yet
+    temp = str(messages[0].raw())
+    temp = temp[13:19]
+    output+=temp
+    temp = str(messages[0].raw())
+    temp=temp[24:39]
+    output+=temp
+    temp = str(messages[0].raw())
+    temp = temp[44:]
+    output+=temp
+    #CONVERT HEX NOTATION TO NORMAL
+    return str(output.decode("hex"))
 
 
 

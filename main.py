@@ -7,7 +7,7 @@ import commands
 global currentPage
 currentPage=1
 global UIINDEBUG
-UIINDEBUG= True
+UIINDEBUG= True ###PLEASE USE THIS
 
 
 
@@ -15,7 +15,7 @@ UIINDEBUG= True
 com = None
 if osx:
     # ports may be different depending on drivers and device
-    com = OBDcom('/dev/tty.usbserial-113010881974', 115200, '6')
+    com = OBDcom('/dev/tty.usbserial-00002014', 115200, '6')
 else:
 
     com = OBDcom('/dev/ttyUSB0', 115200, '6') ###POROTCAL 6 FOR 2013 FRS
@@ -64,14 +64,15 @@ def stylizeui(uiarr, styleid):
 #################################
 #OBD VALUES
 class PIDDATA():
-    def __init__(self, value, uibar, uitext, units):
+    def __init__(self, value, uibar, uitext, units, minvalue):
         self.value = value
         self.uibar = uibar
         self.uitxt= uitext
         self.units = units
+        self.minvalue= minvalue
     def changeValue(self, newvalue):
         self.value = newvalue
-        self.uibar['value'] = self.value
+        self.uibar['value'] = int(self.value)+abs(int(self.minvalue))
         self.uitxt['text'] = str(self.value)+str(self.units)
 
 
@@ -82,6 +83,10 @@ global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp,OilTem
 #LOAD STATIC VALUES FROM FILE
 
 
+oilcmd= commands.getPID("FRS_OIL_TEMP")
+coolantcmd=commands.getPID("COOLANT_TEMP")
+engineloadcmd=commands.getPID("ENGINE_LOAD")
+throttlecmd=commands.getPID("THROTTLE_POS")
 
 ###UPDATE DATA FUNCTIONS
 def updateUIData():
@@ -93,9 +98,10 @@ def updateUIData():
     if(UIINDEBUG):
         return
     if currentPage == 1:
-        ThrottlePos.changeValue(com.query(commands.getPID("THROTTLE_POS")))
-        AbsoluteEngineLoad.changeValue(com.query(commands.getPID("ENGINE_LOAD")))
-        CoolantTemp.changeValue(com.query(commands.getPID("COOLANT_TEMP")))
+        ThrottlePos.changeValue(int(com.query(throttlecmd)))
+        AbsoluteEngineLoad.changeValue(int(com.query(engineloadcmd)))
+        CoolantTemp.changeValue(int(com.query(coolantcmd)))
+        OilTemp.changeValue(int(com.query(oilcmd)))
     if currentPage ==2:
         pass
     if currentPage ==3:
@@ -160,7 +166,7 @@ class Page1(Page):
         coolanttitle.grid(column=0, row=DisplayPos, sticky=tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
         coolantbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
         coolantbar['maximum'] = 300
-        coolantbar['value'] = 50
+        coolantbar['value'] = 40
         coolanttxt = tk.Label(frame, text='0 DEG C')
         coolanttxt.grid(column=2, row=DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
         coolantbar.grid(column=1, row=DisplayPos, sticky=tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
@@ -224,10 +230,10 @@ class Page1(Page):
         ###LAST THING IS CREATE PID OBJS
 
         global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
-        ThrottlePos = PIDDATA(0, throtlebar, throtletxt, "%")
-        AbsoluteEngineLoad = PIDDATA(0, engineabsbar, engineabstxt, "%")
-        CoolantTemp = PIDDATA(0, coolantbar, coolanttxt, 'DEG C')
-        OilTemp = PIDDATA(0, oilbar, oiltxt, 'DEG C')
+        ThrottlePos = PIDDATA(0, throtlebar, throtletxt, "%",0)
+        AbsoluteEngineLoad = PIDDATA(0, engineabsbar, engineabstxt, "%",0)
+        CoolantTemp = PIDDATA(0, coolantbar, coolanttxt, 'DEG C',-40)
+        OilTemp = PIDDATA(0, oilbar, oiltxt, 'DEG C',-40)
 
         ###ALSO ADD ALL TO ARRS AND CALL stylize
         regtxtarr = [throtletitle, coolanttitle, engineabstitle, oiltitle, oiltxt, coolanttxt, engineabstxt, throtletxt]
@@ -240,6 +246,7 @@ class Page1(Page):
 class Page2(Page):
     def __init__(self, *args, **kwargs):
          global ui
+         global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
          Page.__init__(self, *args, **kwargs)
          frame = tk.Frame(self, bg = ui.activeTheme.color4)
          frame.pack(side="top", fill="both", expand=True)
@@ -247,6 +254,7 @@ class Page2(Page):
          title = tk.Label(frame, text='Race View', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                           font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.5), 'bold'))
          title.grid(column=0, row=0, sticky=tk.NW, pady=0)
+         rownum=1
          #0162 ENGINE TQ
 
          #0110 MAF SENSOR FOR AIR FLOW
@@ -289,19 +297,23 @@ class Page3(Page):
 class PageSettings(Page):
     def __init__(self, *args, **kwargs):
         global ui
+        rownum=0
         Page.__init__(self, *args, **kwargs)
         frame = tk.Frame(self)
         frame.pack(side="top", fill="both", expand=True)
         frame.config(bg=ui.activeTheme.color4)
         title = tk.Label(frame, text='Settings', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                          font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.5), 'bold'))
-        title.grid(row=0, column=0, pady=0, sticky= tk.NW)
+        title.grid(row=rownum, column=0, pady=0, sticky= tk.NW)
 
+        #do row nums to add temp support in settings
+        
         ###PEDAL DANCE CTRL HERE###
+        rownum=1
         showpedaltxt=tk.Label(frame, text='Show Track Pop-Up:', bg =ui.activeTheme.color4, fg=ui.activeTheme.color1, font= (ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        showpedaltxt.grid(column=0, row=1, sticky=tk.E)
+        showpedaltxt.grid(column=0, row=rownum, sticky=tk.E)
         showpedalbtn= toggle(frame)
-        showpedalbtn.grid(column = 2, row=1, sticky= tk.NW)
+        showpedalbtn.grid(column = 2, row=rownum, sticky= tk.NW)
         showpedalbtn.load('PedalDancePopUp')
 
         ###PEDAL DANCE CTRL HERE###

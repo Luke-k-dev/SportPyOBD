@@ -17,7 +17,6 @@ else:
 
 print('Setup Complete.')
 
-
 #class for data storage
 class datatype():
 
@@ -51,7 +50,7 @@ data3=datatype('COOLANT_TEMP')
 data4=datatype('FRS_OIL_TEMP')
 data5=datatype('VIN')
 dataarr =[data1,data2,data3,data4,data5]
-dataarr=[data4]
+dataarr=[data5]
 
 def getdata():
     for d in dataarr:
