@@ -5,11 +5,15 @@ import Tkinter as tk
 import ttk
 import commands
 from convert import *
-
+import random as rand
+import gc
 global currentPage
 currentPage=1
 global UIINDEBUG
+global graph
+graph= None
 UIINDEBUG= True ###PLEASE USE THIS
+import timeit
 
 
 
@@ -181,7 +185,7 @@ def updateUIData():
     #print (com(commands.getPID("SPEED")))
     #print('updating data')
     checkforpopup()
-    root.after(5000, updateUIData)
+    #root.after(5000, updateUIData)
 
 def checkforpopup():
     ###this will be called right after the ui updates data perhaps even in the same frame
@@ -314,6 +318,7 @@ class Page1(Page):
         
 class Page2(Page):
     def __init__(self, *args, **kwargs):
+         global graph
          global ui
          global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
          Page.__init__(self, *args, **kwargs)
@@ -329,6 +334,7 @@ class Page2(Page):
          graph= RevGraph(frame, height=340, width=610, bg= ui.activeTheme.color4, bd=0, relief='ridge', highlightthickness=0)
          graph.grid(column=2, row=rownum)
 
+
          # bhp = MAF x 1.25
 
 
@@ -340,14 +346,51 @@ class RevGraph(tk.Canvas):
         tk.Canvas.__init__(self, *args,**kwargs)
         self.rpmcolor = 'red'
         self.tqcolor = 'yellow'
+        self.timescale=50 #50px =1 second
+        self.graphwidth=600
+        self.graphheight =300
+        self.points=[]
+        self.lines=[]
         self.drawlabels()
+        self.points.append(datapt(0,0))
 
-
-    def ElapseTime(self, time):
-        pass
+    def ElapseTime(self):
+        for s in self.points:
+            s.passtime()
     #newpt also passes time
+
+    #iniator function
     def newdatapt(self, rpm, tq):
-        pass
+        self.points.append(datapt(rpm, tq))
+        self.drawgraph()
+
+    #main graph function others just assist
+    def drawgraph(self):
+        self.cleargraph()
+        self.ElapseTime()
+        ct=len(self.points)-1
+        while ct > -1:
+            #######rpm line
+            #we go from high to low high is at far side
+            #rpm from 1 to 8000
+            calcvar= len(self.points)- ct
+            ctt= ct-1
+            if ctt<0:
+                ctt=0
+
+            x1=int(self.graphwidth- calcvar*self.timescale)
+            y1=int(300-int(float(self.points[ct].RPMvalue)/28.0))
+            x2=int(self.graphwidth- (calcvar+1)*self.timescale)
+            y2=int(300-int(float(self.points[ctt].RPMvalue)/28.0))
+
+            self.lines.append(self.create_line(x1,y1,x2,y2))
+
+            #tqline
+
+            ct-=1
+            #print('ct: '+str(ct))
+
+
     def drawlabels(self):
         # grid lines here
         grid = []
@@ -378,7 +421,41 @@ class RevGraph(tk.Canvas):
         self.create_text(70, 14, text='TQ', fill=self.tqcolor, justify=tk.RIGHT, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize*.8)))
         self.create_text(305,330, text='Time Since Last Update', fill= ui.activeTheme.color1, font=(ui.activeTheme.font, ui.activeTheme.fontsize))
 
+    def cleargraph(self):
+        for s in self.lines:
+            self.delete(s)
+        #find out what points to delete
+        numtokeep= int(float(self.graphwidth)/float(self.timescale))+1
+        if(numtokeep < len(self.points)):
+            sent= len(self.points)
+            x=sent-numtokeep-1
+            newarr=[]
+            #print('cut array down')
+            while x <sent:
+                newarr.append(self.points[x])
+                x+=1
+            self.points=newarr
 
+
+
+
+    def debuggraph(self):
+        self.newdatapt(rand.randint(600,8000), rand.randint(0, 65000))
+
+        #call again
+        #print('call again')
+        #root.after(1000, graph.debuggraph())
+
+
+
+
+class datapt():
+    def __init__(self, rpmvalue, tqvalue):
+        self.Time = 0
+        self.RPMvalue= rpmvalue
+        self.TQvalue= tqvalue
+    def passtime(self):
+        self.Time = self.Time+1
 
 
 
@@ -726,6 +803,26 @@ global main, root
 root = tk.Tk()
 
 main = MainView(root)
+'''global oldtime
+oldtime =7'''
+def startupdate():
+    '''global oldtime
+    initime= timeit.default_timer()'''
+    updateUIData()
+    graph.debuggraph()
+    #time=timeit.default_timer()-initime
+    #print (time)
+    #####HERE is what we know, the graph function creates to many instances of lines over time
+    #therfor we must either recycle lines using obj pooling or regin the canvas ()revGrapg after a certain amount of seconds
+    '''if(oldtime +.000005> time):
+        pass
+    else:
+        if(oldtime +.000009 < time):
+            print("######WARING VERY SLOW#######")
+        print ('slower')
+    oldtime = time'''
+    root.after(50,startupdate)
+
 
 def reloadui():
     global main, root
@@ -734,14 +831,18 @@ def reloadui():
     main =MainView(root)
     main.pack(side="top", fill="both", expand=True)
     root.wm_geometry("800x480")
-    updateUIData()
+    ####start update methods####
+
+    startupdate()
     main.loadsettings()
     root.mainloop()
 
+####start update methods####
 main.pack(side="top", fill="both", expand=True)
 root.wm_geometry("800x480")
-updateUIData()
+startupdate()
 root.mainloop()
+
 
 
 # root = Tk()
