@@ -3,3 +3,6 @@ PedalDancePopUp=T
 ShowTurbo=F
 BHPValue=173
 ZT60=6.3
+Ffortemp=T
+MilesforDist=T
+PSIforPressure=T

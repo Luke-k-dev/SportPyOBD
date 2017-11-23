@@ -58,7 +58,7 @@ class settings():
             data = file.readlines()
             line=data[1]
             self.PedalDancePopUp = self.str_to_bool(line[line.find('=')+1:])
-            print("Pedal Dance Pop Up: "+ str(self.PedalDancePopUp))
+            print("Pedal Dance Pop Up: " + str(self.PedalDancePopUp))
             line = data[2]
             self.ShowTurbo = self.str_to_bool(line[line.find('=')+1:])
             print("Show Turbo: " + str(self.PedalDancePopUp))
@@ -68,6 +68,15 @@ class settings():
             line = data[4]
             self.ZT60 = float(line[line.find('=') + 1:])
             print("BHP: " + str(self.ZT60))
+            line = data[5]
+            self.F = self.str_to_bool(line[line.find('=') + 1:])
+            print("Temp in F: " + str(self.F))
+            line= data[6]
+            self.Miles = self.str_to_bool(line[line.find('=') + 1:])
+            print("Dist in Miles: " + str(self.Miles))
+            line = data[7]
+            self.PSI = self.str_to_bool(line[line.find('=') + 1:])
+            print("Boost in PSI: " + str(self.PSI))
 
 
 
