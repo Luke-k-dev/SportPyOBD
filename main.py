@@ -331,8 +331,8 @@ class Page2(Page):
          rownum=1
 
          #rpm graph on the right
-         #graph= RevGraph(frame, height=340, width=610, bg= ui.activeTheme.color4, bd=0, relief='ridge', highlightthickness=0)
-         #graph.grid(column=2, row=rownum)
+         graph= RevGraph(frame, height=340, width=610, bg= ui.activeTheme.color4, bd=0, relief='ridge', highlightthickness=0)
+         graph.grid(column=2, row=rownum)
 
 
          # bhp = MAF x 1.25
@@ -825,7 +825,7 @@ def startupdate():
     '''global oldtime
     initime= timeit.default_timer()'''
     updateUIData()
-    #graph.debuggraph()
+    graph.debuggraph()
     #time=timeit.default_timer()-initime
     #print (time)
     #####HERE is what we know, the graph function creates to many instances of lines over time
