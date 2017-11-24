@@ -331,8 +331,8 @@ class Page2(Page):
          rownum=1
 
          #rpm graph on the right
-         graph= RevGraph(frame, height=340, width=610, bg= ui.activeTheme.color4, bd=0, relief='ridge', highlightthickness=0)
-         graph.grid(column=2, row=rownum)
+         #graph= RevGraph(frame, height=340, width=610, bg= ui.activeTheme.color4, bd=0, relief='ridge', highlightthickness=0)
+         #graph.grid(column=2, row=rownum)
 
 
          # bhp = MAF x 1.25
@@ -382,8 +382,12 @@ class RevGraph(tk.Canvas):
             y1=int(300-int(float(self.points[ct].RPMvalue)/28.0))
             x2=int(self.graphwidth- (calcvar+1)*self.timescale)
             y2=int(300-int(float(self.points[ctt].RPMvalue)/28.0))
+            ###OLD CODE HERE###
+            #self.lines.append(self.create_line(x1,y1,x2,y2))
 
-            self.lines.append(self.create_line(x1,y1,x2,y2))
+            ###OBJ POOL###
+            self.coords(self.lines[ct], x1, y1, x2, y2)
+
 
             #tqline
 
@@ -420,10 +424,16 @@ class RevGraph(tk.Canvas):
         self.create_text(30,14, text='RPM', fill=self.rpmcolor, justify=tk.RIGHT, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize*.8)))
         self.create_text(70, 14, text='TQ', fill=self.tqcolor, justify=tk.RIGHT, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize*.8)))
         self.create_text(305,330, text='Time Since Last Update', fill= ui.activeTheme.color1, font=(ui.activeTheme.font, ui.activeTheme.fontsize))
+        ###create line obj pool
+        x= 15 #lines length
+        while x > -1:
+            self.lines.append(self.create_line(0,0,0,0))
+            x-=1
 
     def cleargraph(self):
-        for s in self.lines:
-            self.delete(s)
+        #for s in self.lines:
+        #    self.delete(s)
+        #self.lines =[]
         #find out what points to delete
         numtokeep= int(float(self.graphwidth)/float(self.timescale))+1
         if(numtokeep < len(self.points)):
@@ -441,10 +451,16 @@ class RevGraph(tk.Canvas):
 
     def debuggraph(self):
         self.newdatapt(rand.randint(600,8000), rand.randint(0, 65000))
+        '''print("Graph debug\n---------")
+        print("self.lines size: "+str(self.lines.__sizeof__())+' bytes')
+        print("self.points size: " + str(self.points.__sizeof__()) + ' bytes')
+        #calc abg id
+        x=0
+        for l in self.lines:
+            x+=l
+        x= x/len(self.lines)
+        print('avg line id: ' +str(x))'''
 
-        #call again
-        #print('call again')
-        #root.after(1000, graph.debuggraph())
 
 
 
@@ -809,7 +825,7 @@ def startupdate():
     '''global oldtime
     initime= timeit.default_timer()'''
     updateUIData()
-    graph.debuggraph()
+    #graph.debuggraph()
     #time=timeit.default_timer()-initime
     #print (time)
     #####HERE is what we know, the graph function creates to many instances of lines over time
@@ -821,7 +837,7 @@ def startupdate():
             print("######WARING VERY SLOW#######")
         print ('slower')
     oldtime = time'''
-    root.after(50,startupdate)
+    root.after(1000,startupdate)
 
 
 def reloadui():
