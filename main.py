@@ -6,15 +6,18 @@ import ttk
 import commands
 from convert import *
 import random as rand
-import gc
+from Gauge import Gauge
 global currentPage
 currentPage=1
 global UIINDEBUG
 global graph
+global coldlight, TrackReady, HeatWarning, CWarning
 graph= None
 UIINDEBUG= True ###PLEASE USE THIS
 import timeit
 
+global COMERROR
+COMERROR=False
 
 
 ###SET UP OBD CONNECTION###
@@ -35,7 +38,7 @@ Settings = settings()
 # THEMES ARE HERE COLOR COLOR COLOR COLOR FONT SIZE
 #FONT COLOR 1, FONT COLOR 2, PROGRESS BAR COLOR, backgourd color
 # theme 1
-t1 = css("#f47142", "#493030", "#332a23", "#303030", "Helvetica", 20)
+t1 = css("#1e74ff", "#493030", "#332a23", "#303030", "Helvetica", 20)
 # theme 2
 t2 = css("#382", "#233", "#FFF", "#FFF", "Helvetica", 20)
 # theme 3
@@ -70,7 +73,7 @@ def stylizeui(uiarr, styleid):
 #################################
 #OBD VALUES
 class PIDDATA():
-    Temp = "Temp"
+    '''Temp = "Temp"
     Percent="%"
     Distance = "Dist"
     Pressure = "KPA"
@@ -78,84 +81,23 @@ class PIDDATA():
     Count = 'count'
     Ratio='Ratio'
     Airflow='G/S'
+    '''
 
-    def __init__(self, value, uibar, uitext, typeofunit, minvalue):
-        self.TypeOfUnit = typeofunit
-        ###FOR TEMP###
-        v= value
-        if(typeofunit== PIDDATA.Temp):
-            if(Settings.F):
-                self.value = CtoF(value)
-                self.uibar = uibar
-                self.uitxt = uitext
-                self.units = " F"
-                self.minvalue = CtoF(minvalue)
-            else:
-                self.value = value
-                self.uibar = uibar
-                self.uitxt= uitext
-                self.units = " C"
-                self.minvalue= minvalue
-        elif typeofunit == PIDDATA.Percent:
-            self.value = value
-            self.uibar = uibar
-            self.uitxt = uitext
-            self.units = " %"
-            self.minvalue = minvalue
-        elif typeofunit ==PIDDATA.Count:
-            self.value = value
-            self.uibar = uibar
-            self.uitxt = uitext
-            self.units = " Ct."
-            self.minvalue = minvalue
-        elif(typeofunit== PIDDATA.Distance):
-            if(Settings.Miles):
-                self.value = KmtoM(value)
-                self.uibar = uibar
-                self.uitxt = uitext
-                self.units = " Miles"
-                self.minvalue = KmtoM(minvalue)
-            else:
-                self.value = value
-                self.uibar = uibar
-                self.uitxt= uitext
-                self.units = " Km"
-                self.minvalue= minvalue
-        #Catch units not yet made
-        try:
-            self.changeValue(v)
-        except:
-            print("ERROR UNIT NOT IMPLEMENTED IN PIDDATA CLASS, ALSO CHACK CHANGE VALUE METHOD AFTER PLZZZZ")
-            raise NotImplementedError
+    def __init__(self, gauge):
+        self.GAUGE = gauge
+        self.Value= gauge.Value
     def changeValue(self, newvalue):
-        unitsupported = False
-        if(self.TypeOfUnit ==PIDDATA.Temp):
-            unitsupported = True
-            if(Settings.F):
-                self.value = CtoF(newvalue)
-            else:
-                self.value= newvalue
-        elif(self.TypeOfUnit ==PIDDATA.Percent or self.TypeOfUnit ==PIDDATA.Count):
-            unitsupported = True
-            self.value= newvalue
+        self.GAUGE.changeValue(newvalue)
+        self.Value= newvalue
 
 
-
-        ###we always do these
-        if(unitsupported != True):
-            print("ERROR UNIT NOT IMPLEMENTED IN PIDDATA changeValue(newvalue) method")
-            raise NotImplementedError
-        self.uibar['value'] = int(self.value)+abs(int(self.minvalue))
-        self.uitxt['text'] = str(self.value)+" "+str(self.units)
-
-
-global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp,OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
+global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp,OilTemp, FuelRate, AirIntakeTemp, ThrottlePos, MAFORBOOST
 
 #UI VARS
 
 #LOAD STATIC VALUES FROM FILE
 
-
+MAFcmd=commands.getPID('MAF')
 oilcmd= commands.getPID("FRS_OIL_TEMP")
 coolantcmd=commands.getPID("COOLANT_TEMP")
 engineloadcmd=commands.getPID("ENGINE_LOAD")
@@ -165,16 +107,17 @@ throttlecmd=commands.getPID("THROTTLE_POS")
 def updateUIData():
     ###STORE ALL PID IN ARRAY FOR EASIER UPDATING WITH FOR LOOP
     ###ALSO REDUCE DELAY FOR COM to .09 this will allow fast comunication and no overload and backup on obd que
-    global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
+    global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos, MAFORBOOST
 
     ###CHECK PAGE BY PAGE FOR UPDATES B/C UPDATING ALL AT ONCE IS BAD AF
     if(UIINDEBUG):
+        checkforstatus()
         return
     if currentPage == 1:
-        ThrottlePos.changeValue(int(com.query(throttlecmd)))
+        MAFORBOOST.changeValue(int(com.query(MAFcmd)))
         AbsoluteEngineLoad.changeValue(int(com.query(engineloadcmd)))
-        CoolantTemp.changeValue(int(com.query(coolantcmd)))
-        OilTemp.changeValue(int(com.query(oilcmd)))
+        CoolantTemp.changeValue(CtoF(int(com.query(coolantcmd))))
+        OilTemp.changeValue(CtoF(int(com.query(oilcmd))))
     if currentPage ==2:
         pass
     if currentPage ==3:
@@ -184,13 +127,31 @@ def updateUIData():
 
     #print (com(commands.getPID("SPEED")))
     #print('updating data')
-    checkforpopup()
+    checkforstatus()
     #root.after(5000, updateUIData)
 
-def checkforpopup():
-    ###this will be called right after the ui updates data perhaps even in the same frame
-    #Pedal Dance Here
-    pass
+def checkforstatus():
+
+    if(CoolantTemp.Value < 120):
+        #popup snowflake
+        coldlight.SetStatus(True)
+    else:
+        coldlight.SetStatus(False)
+
+    if (CoolantTemp.Value >173):
+        # popup snowflake
+        TrackReady.SetStatus(True)
+    else:
+        TrackReady.SetStatus(False)
+    if (CoolantTemp.Value >240 or OilTemp.Value > 265):
+        # popup snowflake
+        HeatWarning.SetStatus(True)
+    else:
+        HeatWarning.SetStatus(False)
+    if(COMERROR):
+        CWarning.SetStatus(True)
+    else:
+        CWarning.SetStatus(False)
 ###UI CLASS HERE
 
 class Page(tk.Frame):
@@ -225,95 +186,118 @@ class Page1(Page):
 
     def __init__(self, *args, **kwargs):
         global ui
-
+        stylearr=[]
+        gaugesticky= tk.NS
+        gaugepadx=0
+        gaugepady=0
         Page.__init__(self, *args, **kwargs)
         frame = tk.Frame(self, bg = ui.activeTheme.color4)
         frame.pack(side="top", fill="both", expand=True)
         #create the display here
         title = tk.Label(frame, text='Overview', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                          font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.5),'bold'))
-        title.grid(column=0, row=0, sticky=tk.NW, pady=0)
-        DisplayPos = 1
+        title.grid(column=0, row=0, columnspan=3, sticky=tk.NW, pady=0)
+        #spacer
+        tk.Label(frame, text='',pady=0, bg=ui.activeTheme.color4).grid(column=0, row=1)
+
+        DisplayPos = 0
         #0105 ENGINE COOLANT TEMP USE THIS TO DETECT PEDAL DANCE @ 174F
-        coolanttitle = tk.Label(frame, text='Coolant Temp: ')
-        coolanttitle.grid(column=0, row=DisplayPos, sticky=tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
-        coolantbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
-        coolantbar['maximum'] = 300
-        coolantbar['value'] = 40
-        coolanttxt = tk.Label(frame, text='0 DEG C')
-        coolanttxt.grid(column=2, row=DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
-        coolantbar.grid(column=1, row=DisplayPos, sticky=tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+        t=tk.Label(frame, text='Coolant Temp', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                 font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .9)))
+        t.grid(column=DisplayPos, row=2)
+        coolantg = Gauge(frame,width=200, height=200)
+        coolantg.grid(column=DisplayPos, row=3, sticky = gaugesticky, pady= gaugepady, padx=gaugepadx)
+        coolantg.setup(32,-10,250,'°F', 15)
+        stylearr.append(coolantg)
+
+        DisplayPos=1
+        # 015C ENGINE OIL TEMP
+        t = tk.Label(frame, text='Oil Temp', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                     font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .9)))
+        t.grid(column=DisplayPos, row=2)
+        oilg = Gauge(frame, width=200, height=200)
+        oilg.grid(column=DisplayPos, row=3, sticky=gaugesticky, pady=gaugepady, padx=gaugepadx)
+        oilg.setup(32, -10, 280, '°F', 10)
+        stylearr.append(oilg)
+
+
 
         DisplayPos=2
-        #0106 FUEL TRIM %
+        #0104 ABSOLUTE ENGINE LOAD
+        t = tk.Label(frame, text='Absolute Load', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                     font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .9)))
+        t.grid(column=DisplayPos, row=2)
+        abslg = Gauge(frame, width=200, height=200)
+        abslg.grid(column=DisplayPos, row=3, sticky=gaugesticky, pady=gaugepady, padx=gaugepadx)
+        abslg.setup(0, 0, 100, '%', 20)
+        stylearr.append(abslg)
 
-
-        DisplayPos=3
         #0110 MAF SENSOR FOR AIR FLOW
 
-        DisplayPos=4
-        #0143 ABSOLUTE ENGINE LOAD
-        engineabstitle = tk.Label(frame, text='Engine Load: ')
-        engineabstitle.grid(column=0, row=DisplayPos, sticky=tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
-        engineabsbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
-        engineabsbar['maximum'] = 25700
-        engineabsbar['value'] = 200
-        engineabstxt = tk.Label(frame, text='0%')
-        engineabstxt.grid(column=2, row=DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
-        engineabsbar.grid(column=1, row=DisplayPos, sticky=tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+        DisplayPos=3
+        t = tk.Label(frame, text='Air Flow', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                     font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .9)))
+        t.grid(column=DisplayPos, row=2)
+        aflowg = Gauge(frame, width=200, height=200)
+        aflowg.grid(column=DisplayPos, row=3, sticky=gaugesticky, pady=gaugepady, padx=gaugepadx)
+        aflowg.setup(0, 0, 655, 'g/s', 75)
+        stylearr.append(aflowg)
 
-        DisplayPos=5
-        #015C ENGINE OIL TEMP
-        oiltitle = tk.Label(frame, text='Oil Temp: ')
-        oiltitle.grid(column=0, row=DisplayPos, sticky=tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
-        oilbar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
-        oilbar['maximum'] = 300
-        oilbar['value'] = 10
-        oiltxt = tk.Label(frame, text='0 DEG C')
-        oiltxt.grid(column=2, row=DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
-        oilbar.grid(column=1, row=DisplayPos, sticky=tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
+        ###NOW we do status lights
+        global coldlight, TrackReady, HeatWarning, CWarning
+        statpady= 20
+        coldlight= statusWarning(frame,'blue',ui.activeTheme.unlitColor, False, '❄')
+        coldlight.grid(column=0, row=4,pady=statpady)
+        TrackReady = statusWarning(frame, '#02ce1d', ui.activeTheme.unlitColor, False, '∞')
+        TrackReady.grid(column=1, row=4, pady=statpady)
+        HeatWarning = statusWarning(frame, '#ff5900', ui.activeTheme.unlitColor, False, 'HOT')
+        HeatWarning.grid(column=2, row=4, pady=statpady)
+        CWarning = statusWarning(frame, 'red', ui.activeTheme.unlitColor, False, '!!!')
+        CWarning.grid(column=3, row=4, pady=statpady)
 
-        DisplayPos=6
-        #015E ENGINE FUEL RATE LITERS/HR
-
-        DisplayPos=7
-        #0162 ENGINE TQ
-
-        DisplayPos=8
-        #0168 INTAKE AIR TEMP
-
-        DisplayPos=9
-        #throttle pos PID: 0111
-        throtletitle = tk.Label(frame, text='Throttle Pos: ')
-        throtletitle.grid(column =0, row=DisplayPos, sticky= tk.NE, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
-        throtlebar = ttk.Progressbar(frame, orient="horizontal", length=500, mode="determinate")
-        throtlebar['maximum'] = 100
-        throtlebar['value'] = 10
-        throtletxt= tk.Label(frame, text='0%')
-        throtletxt.grid(column = 2, row =DisplayPos, sticky=tk.NW, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
-        throtlebar.grid(column = 1, row=DisplayPos, sticky= tk.NS, padx= ui.activeTheme.padx, pady=ui.activeTheme.pady)
 
 
         ###ADDSPACE ON LAST ROW AND COL
-        spacecol = tk.Label(frame, text='', bg=ui.activeTheme.color4, fg = ui.activeTheme.color1, font =(ui.activeTheme.font, ui.activeTheme.fontsize))
-        spacecol.grid(column = 99, row = 0, padx = 400)
-        spacerow = tk.Label(frame, text='', bg=ui.activeTheme.color4, fg = ui.activeTheme.color1, font =(ui.activeTheme.font, ui.activeTheme.fontsize))
-        spacerow.grid(column=0, row=99, pady=400)
 
         ###LAST THING IS CREATE PID OBJS
 
-        global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
-        ThrottlePos = PIDDATA(0, throtlebar, throtletxt, PIDDATA.Percent,0)
-        AbsoluteEngineLoad = PIDDATA(0, engineabsbar, engineabstxt, PIDDATA.Percent,0)
-        CoolantTemp = PIDDATA(0, coolantbar, coolanttxt, PIDDATA.Temp,-40)
-        OilTemp = PIDDATA(0, oilbar, oiltxt, PIDDATA.Temp,-40)
+        global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos, MAFORBOOST
+        #ThrottlePos = PIDDATA(0, throtlebar, throtletxt, PIDDATA.Percent,0)
+        #AbsoluteEngineLoad = PIDDATA(0, engineabsbar, engineabstxt, PIDDATA.Percent,0)
+        CoolantTemp = PIDDATA(coolantg)
+        OilTemp = PIDDATA(oilg)
+        AbsoluteEngineLoad= PIDDATA(abslg)
+        MAFORBOOST = PIDDATA(aflowg)
 
         ###ALSO ADD ALL TO ARRS AND CALL stylize
-        regtxtarr = [throtletitle, coolanttitle, engineabstitle, oiltitle, oiltxt, coolanttxt, engineabstxt, throtletxt]
-        stylizeui(regtxtarr, 'pagetext')
+        #regtxtarr = [throtletitle, coolanttitle, engineabstitle, oiltitle, oiltxt, coolanttxt, engineabstxt, throtletxt]
+        #stylizeui(regtxtarr, 'pagetext')
 
-        progressbars =[oilbar,coolantbar,engineabsbar,throtlebar]
-        stylizeui(progressbars, 'progressbar')
+        #progressbars =[oilbar,coolantbar,engineabsbar,throtlebar]
+        #stylizeui(progressbars, 'progressbar')
+
+
+        for s in stylearr:
+            s.style(0,ui.activeTheme.color1,ui.activeTheme.color4, ui.activeTheme.font, ui.activeTheme.fontsize)
+            s.inidraw()
+
+class statusWarning(tk.Label):
+    def __init__(self, parrent, litcolor, unlitcolor, boollitornot, symbol):
+        tk.Label.__init__(self,parrent, fg= litcolor, bg=ui.activeTheme.color4, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize*3)), text=symbol)
+        self.lit= boollitornot
+        self.litColor=litcolor
+        self.unlitColor = unlitcolor
+        self.check()
+    def SetStatus(self, bool):
+        self.lit = bool
+        self.check()
+    def check(self):
+        if(self.lit):
+            self['fg']= self.litColor
+        else:
+            self['fg']= self.unlitColor
+
+
 
         
 class Page2(Page):
@@ -735,7 +719,7 @@ class MainView(tk.Frame):
         p2 = Page2(self)
         p3 = Page3(self)
         p4 = PageSettings(self)
-        popupwindow = popup(self)
+
         p1.id='p1'
         p2.id='p2'
         p3.id='p3'
@@ -794,7 +778,7 @@ class MainView(tk.Frame):
         p2.grid(column=1, row=1, in_=container, sticky=tk.NW)
         p3.grid(column=1, row=1, in_=container, sticky=tk.NW)
         p4.grid(column=1, row=1, in_=container, sticky=tk.NW)
-        popupwindow.grid(column=1, row =1, in_=container, sticky = tk.NSEW)
+
 
         
         ###PACK THE BUTTONS FOR THE NAV###
@@ -837,7 +821,7 @@ def startupdate():
             print("######WARING VERY SLOW#######")
         print ('slower')
     oldtime = time'''
-    root.after(1000,startupdate)
+    root.after(1000, startupdate)
 
 
 def reloadui():

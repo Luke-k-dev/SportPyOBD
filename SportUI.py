@@ -115,6 +115,7 @@ class css():
         self.color2 = c2
         self.color3 = c3
         self.color4 = c4
+        self.unlitColor ='#232323'
         self.alertcolor = 'yellow'
         self.font = font
         self.fontsize = fontsize
