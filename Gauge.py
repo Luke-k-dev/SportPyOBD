@@ -24,7 +24,8 @@ class Gauge(tk.Canvas):
         if (self.Value < self.MinValue):
             self.Value = self.MinValue
         elif(self.Value > self.MaxValue):
-            self.Value = self.MaxValue
+            #self.Value = self.MaxValue
+            pass
         self.updatePOD()
 
 

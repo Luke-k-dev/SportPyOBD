@@ -44,13 +44,11 @@ class datatype():
 
 
 #get data
-data1=datatype('THROTTLE_POS')
-data2=datatype('ENGINE_LOAD')
-data3=datatype('COOLANT_TEMP')
-data4=datatype('FRS_OIL_TEMP')
+data1=datatype('RPM')
+
 data5=datatype('VIN')
-dataarr =[data1,data2,data3,data4,data5]
-dataarr=[data5]
+dataarr =[data1,data5]
+dataarr=[data1]
 
 def getdata():
     for d in dataarr:
@@ -90,10 +88,10 @@ for k in dataarr:
 print (header)
 print(key)
 print(data1.output())
-print(data2.output())
-print(data3.output())
-print(data4.output())
-print(data5.output())
+#print(data2.output())
+#print(data3.output())
+#print(data4.output())
+#print(data5.output())
 print('record data to file?(y/n)')
 yn = raw_input("Y/N:")
 if yn.capitalize()=="Y":

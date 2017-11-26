@@ -93,9 +93,24 @@ def uas(id):
 
 
 def decode_uas(messages, id):
-    d = messages[0].data[2:] # chop off mode and PID bytes
-    return UAS_IDS[id](d)
+    x = str(messages[0].raw()) # chop off mode and PID bytes
+    print ("SETUP DECODER")
+    raise NotImplementedError
+    print(x)
+    a = bytes_to_int(x[9:11])
+    print("A: "+str(a))
+    b= bytes_to_int(x[11:13])
+    print ('B: '+str(b))
+    return 0
 
+def MAF(messages):
+    x=messages[0].raw()
+    a=int(x[9:11],16)
+    #print(a)
+    b=int(x[11:13],16)
+
+    #print(b)
+    return int(float(a*256 +b)/100.0)
 
 """
 General sensor decoders
@@ -109,6 +124,44 @@ def percent(messages):
     v = v * 100.0 / 255.0
     #return v * Unit.percent
     return messages[0].data[0]
+
+def enginepercent(messages):
+    d = str(messages[0].raw())
+    v = d[9:11]
+    v= int(v, 16)
+    #print(v)
+    v = (float(v) * 100.0) / 255.0
+    #print(v)
+    #return v * Unit.percent
+    return int(v)
+def RPM(messages):
+    d = str(messages[0].raw())
+    a = d[9:11]
+    b= d[11:13]
+
+    b= int(b,16)
+    a= int(a, 16)*256
+    print (a)
+    print (b)
+    #print(v)
+    v = (float(a) +float(b)) / 4
+    print (v)
+    #print(v)
+    #return v * Unit.percent
+    return int(v)
+
+def enginetq(messages):
+    d = str(messages[0].raw())
+    a = d[9:11]
+    print (a)
+    print(d[11:13])
+    a = int(a,16)*256
+    print(a)
+    print(d[11:13])
+    b= int(d[11:13], 16)
+    print(d)
+    #return v * Unit.percent
+    return int(a+b)
 
 
 # -100 to 100 %
@@ -412,12 +465,15 @@ def vin(messages):
     #not quite perfect yet
     temp = str(messages[0].raw())
     temp = temp[13:19]
+    print(temp)
     output+=temp
     temp = str(messages[0].raw())
-    temp=temp[24:39]
+    temp=temp[25:39]
+    print(temp)
     output+=temp
     temp = str(messages[0].raw())
-    temp = temp[44:]
+    temp = temp[45:]
+    print(temp)
     output+=temp
     #CONVERT HEX NOTATION TO NORMAL
     return str(output.decode("hex"))

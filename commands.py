@@ -66,7 +66,7 @@ __mode1__ = [
     OBDCommand("STATUS"                     , "Status since DTCs cleared"               , b"0101", 6, status,                ECU.ENGINE, True),
     OBDCommand("FREEZE_DTC"                 , "DTC that triggered the freeze frame"     , b"0102", 4, single_dtc,            ECU.ENGINE, True),
     OBDCommand("FUEL_STATUS"                , "Fuel System Status"                      , b"0103", 4, fuel_status,           ECU.ENGINE, True),
-    OBDCommand("ENGINE_LOAD"                , "Calculated Engine Load"                  , b"0104", 3, percent,               ECU.ENGINE, True),
+    OBDCommand("ENGINE_LOAD"                , "Calculated Engine Load"                  , b"0104", 3, enginepercent,               ECU.ENGINE, True),
     OBDCommand("COOLANT_TEMP"               , "Engine Coolant Temperature"              , b"0105", 3, temp,                  ECU.ENGINE, True),
     OBDCommand("SHORT_FUEL_TRIM_1"          , "Short Term Fuel Trim - Bank 1"           , b"0106", 3, percent_centered,      ECU.ENGINE, True),
     OBDCommand("LONG_FUEL_TRIM_1"           , "Long Term Fuel Trim - Bank 1"            , b"0107", 3, percent_centered,      ECU.ENGINE, True),
@@ -74,11 +74,11 @@ __mode1__ = [
     OBDCommand("LONG_FUEL_TRIM_2"           , "Long Term Fuel Trim - Bank 2"            , b"0109", 3, percent_centered,      ECU.ENGINE, True),
     OBDCommand("FUEL_PRESSURE"              , "Fuel Pressure"                           , b"010A", 3, fuel_pressure,         ECU.ENGINE, True),
     OBDCommand("INTAKE_PRESSURE"            , "Intake Manifold Pressure"                , b"010B", 3, pressure,              ECU.ENGINE, True),
-    OBDCommand("RPM"                        , "Engine RPM"                              , b"010C", 4, uas(0x07),             ECU.ENGINE, True),
+    OBDCommand("RPM"                        , "Engine RPM"                              , b"010C", 4, RPM,             ECU.ENGINE, True),
     OBDCommand("SPEED"                      , "Vehicle Speed"                           , b"010D", 3, uas(0x09),             ECU.ENGINE, True),
     OBDCommand("TIMING_ADVANCE"             , "Timing Advance"                          , b"010E", 3, timing_advance,        ECU.ENGINE, True),
     OBDCommand("INTAKE_TEMP"                , "Intake Air Temp"                         , b"010F", 3, temp,                  ECU.ENGINE, True),
-    OBDCommand("MAF"                        , "Air Flow Rate (MAF)"                     , b"0110", 4, uas(0x27),             ECU.ENGINE, True),
+    OBDCommand("MAF"                        , "Air Flow Rate (MAF)"                     , b"0110", 4, MAF,                   ECU.ENGINE, True),
     OBDCommand("THROTTLE_POS"               , "Throttle Position"                       , b"0111", 3, percent,               ECU.ENGINE, True),
     OBDCommand("AIR_STATUS"                 , "Secondary Air Status"                    , b"0112", 3, air_status,            ECU.ENGINE, True),
     OBDCommand("O2_SENSORS"                 , "O2 Sensors Present"                      , b"0113", 3, o2_sensors,            ECU.ENGINE, True),
@@ -309,6 +309,7 @@ __misc__ = [
     OBDCommand("ELM_VERSION"                , "ELM327 version string"                   , b"ATI",  0, raw_string,            ECU.UNKNOWN, False),
     OBDCommand("ELM_VOLTAGE"                , "Voltage detected by OBD-II adapter"      , b"ATRV", 0, elm_voltage,           ECU.UNKNOWN, False),
     OBDCommand("FRS_OIL_TEMP"                , "Non standard frs oil temp PID"          , b"2101", 31, frsoil,           ECU.ENGINE, False),
+    OBDCommand("TQ"                         , "Non standard TQ PID"          , b"0163", 2, enginetq,           ECU.ENGINE, False),
 ]
 
 

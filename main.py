@@ -9,6 +9,7 @@ import random as rand
 from Gauge import Gauge
 global currentPage
 currentPage=1
+global carvin
 global UIINDEBUG
 global graph
 global coldlight, TrackReady, HeatWarning, CWarning
@@ -102,24 +103,34 @@ oilcmd= commands.getPID("FRS_OIL_TEMP")
 coolantcmd=commands.getPID("COOLANT_TEMP")
 engineloadcmd=commands.getPID("ENGINE_LOAD")
 throttlecmd=commands.getPID("THROTTLE_POS")
-
+rpmcmd=commands.getPID("RPM")
+tqcmd=commands.getPID("THROTTLE_POS")
 ###UPDATE DATA FUNCTIONS
+global firstpass
+firstpass= True
 def updateUIData():
     ###STORE ALL PID IN ARRAY FOR EASIER UPDATING WITH FOR LOOP
     ###ALSO REDUCE DELAY FOR COM to .09 this will allow fast comunication and no overload and backup on obd que
     global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos, MAFORBOOST
-
+    global firstpass
     ###CHECK PAGE BY PAGE FOR UPDATES B/C UPDATING ALL AT ONCE IS BAD AF
     if(UIINDEBUG):
         checkforstatus()
         return
+    if(firstpass):
+        firstpass=False
+        carvin['text']= "["+str(com.query(commands.getPID("VIN")))+']'
+
     if currentPage == 1:
         MAFORBOOST.changeValue(int(com.query(MAFcmd)))
         AbsoluteEngineLoad.changeValue(int(com.query(engineloadcmd)))
         CoolantTemp.changeValue(CtoF(int(com.query(coolantcmd))))
         OilTemp.changeValue(CtoF(int(com.query(oilcmd))))
     if currentPage ==2:
-        pass
+        hp=200.00 #horsepower of engine
+        localrpm=int(com.query(rpmcmd))
+        localtq= int(((float(localrpm) *  5252)/hp))
+        graph.newdatapt(localrpm,localtq)
     if currentPage ==3:
         pass
 
@@ -676,26 +687,6 @@ class toggle(tk.Button):
                 self.setoff()
         ###REPEAT STRUCTURE FOR OTHER TOGGLES
 
-class popup(tk.Frame):
-
-    def __init__(self, *args, **kwargs):
-        global ui
-        tk.Frame.__init__(self, *args, **kwargs)
-        self.config(bg=ui.activeTheme.color4)
-        self.pdancetxt='TRACK MODE\nREADY\n'+u"\u26A0"
-        self.coldwarning = 'ENGINE\nCOLD\n' + u"\u26A0"
-        self.txt = tk.Label(self, text="", bg=ui.activeTheme.color4, fg= ui.activeTheme.alertcolor, font= (ui.activeTheme.fontsize,90))
-        self.txt.pack()
-    def show(self, displayset):
-        if displayset=='PEDAL':
-            self.txt['text'] = self.pdancetxt
-        elif displayset =='ENGINECOLD':
-            self.txt['text'] = self.coldwarning
-        elif displayset == "OILTEMP":
-            pass
-        elif displayset=='BCK':
-            ###THIS IS FOR UI BCK FORMATING
-            self.txt['text']= 'test'
 
 class MainView(tk.Frame):
     global p4
@@ -748,7 +739,8 @@ class MainView(tk.Frame):
         cartitle = tk.Label(buttonframe, text='FR-S ')
         cartitle.pack(side='left')
         cartitle.config(fg=ui.activeTheme.color1, bg= ui.activeTheme.color4, font = (ui.activeTheme.font, int(ui.activeTheme.fontsize*1.4)))
-        carvin = tk.Label(buttonframe, text ='[JF1ZCAC12D1607662]')
+        global carvin
+        carvin = tk.Label(buttonframe, text ='[VIN HERE]')
         carvin.config(fg=ui.activeTheme.color1, bg= ui.activeTheme.color4, font = (ui.activeTheme.font, int(ui.activeTheme.fontsize*0.9)))
         carvin.pack(side = 'left')
         
@@ -809,7 +801,7 @@ def startupdate():
     '''global oldtime
     initime= timeit.default_timer()'''
     updateUIData()
-    graph.debuggraph()
+    #graph.debuggraph()
     #time=timeit.default_timer()-initime
     #print (time)
     #####HERE is what we know, the graph function creates to many instances of lines over time
