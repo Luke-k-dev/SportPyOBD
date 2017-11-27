@@ -38,6 +38,7 @@ class Gauge(tk.Canvas):
 
     def inidraw(self):
         self['bg']=self.Color4
+        #self['bg']='white'
         self['bd']=0
         self['highlightthickness'] = 0
         self['relief'] = 'ridge'

@@ -322,15 +322,37 @@ class Page2(Page):
          #create the display here
          title = tk.Label(frame, text='Race View', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                           font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.5), 'bold'))
-         title.grid(column=0, row=0, sticky=tk.NW, pady=0)
+         title.grid(column=0, row=0, sticky=tk.NW, pady=0, columnspan=3)
          rownum=1
 
          #rpm graph on the right
          graph= RevGraph(frame, height=340, width=610, bg= ui.activeTheme.color4, bd=0, relief='ridge', highlightthickness=0)
-         graph.grid(column=2, row=rownum)
+         graph.grid(column=2, row=rownum, rowspan=5)
 
-
-         # bhp = MAF x 1.25
+         #tiny gauges here
+         tinygarr=[]
+         gaugepady=0
+         gaugepadx=20
+         gaugesticky=tk.NS
+         #oil
+         t = tk.Label(frame, text='Oil Temp', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                      font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .9)))
+         t.grid(column=0, row=1)
+         oilg = Gauge(frame, width=150, height=150)
+         oilg.grid(column=0, row=2, pady=gaugepady, padx=gaugepadx, sticky= gaugesticky)
+         oilg.setup(32, -10, 280, '°F', 10)
+         tinygarr.append(oilg)
+         #MAF
+         t = tk.Label(frame, text='MAF', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+                      font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .9)))
+         t.grid(column=0, row=3)
+         mafg = Gauge(frame, width=150, height=150)
+         mafg.grid(column=0, row=4, pady=gaugepady, padx=gaugepadx, sticky=gaugesticky)
+         mafg.setup(0, 0, 655, 'g/s', 75)
+         tinygarr.append(mafg)
+         for s in tinygarr:
+             s.style(0, ui.activeTheme.color1, ui.activeTheme.color4, ui.activeTheme.font, ui.activeTheme.fontsize)
+             s.inidraw()
 
 
 ###create rpm and TQ graph
@@ -339,13 +361,15 @@ class RevGraph(tk.Canvas):
 
     def __init__(self, *args, **kwargs):
         tk.Canvas.__init__(self, *args,**kwargs)
-        self.rpmcolor = 'red'
-        self.tqcolor = 'yellow'
+        self.rpmcolor = ui.activeTheme.color1
+        self.spdcolor = '#57ed70'
+        self.gridcolor='#232323'
         self.timescale=50 #50px =1 second
         self.graphwidth=600
         self.graphheight =300
         self.points=[]
-        self.lines=[]
+        self.lines=[]#for rpm
+        self.speedlines=[]##for tq
         self.drawlabels()
         self.points.append(datapt(0,0))
 
@@ -374,9 +398,9 @@ class RevGraph(tk.Canvas):
                 ctt=0
 
             x1=int(self.graphwidth- calcvar*self.timescale)
-            y1=int(300-int(float(self.points[ct].RPMvalue)/28.0))
+            y1=int(300-int(float(self.points[ct].RPMvalue)/30.0))
             x2=int(self.graphwidth- (calcvar+1)*self.timescale)
-            y2=int(300-int(float(self.points[ctt].RPMvalue)/28.0))
+            y2=int(300-int(float(self.points[ctt].RPMvalue)/30.0))
             ###OLD CODE HERE###
             #self.lines.append(self.create_line(x1,y1,x2,y2))
 
@@ -384,8 +408,17 @@ class RevGraph(tk.Canvas):
             self.coords(self.lines[ct], x1, y1, x2, y2)
 
 
-            #tqline
 
+            #spdline
+            x1 = int(self.graphwidth - calcvar * self.timescale)
+            y1 = int(300 - int(float(self.points[ct].Speedvalue) *1.5))
+            x2 = int(self.graphwidth - (calcvar + 1) * self.timescale)
+            y2 = int(300 - int(float(self.points[ctt].Speedvalue) *1.5))
+            ###OLD CODE HERE###
+            # self.lines.append(self.create_line(x1,y1,x2,y2))
+
+            ###OBJ POOL###
+            self.coords(self.speedlines[ct], x1, y1, x2, y2)
             ct-=1
             #print('ct: '+str(ct))
 
@@ -405,8 +438,22 @@ class RevGraph(tk.Canvas):
             grid.append(self.create_line(xpos, 0, xpos, 300))
             xpos = xpos + gridspacing
         for g in grid:
-            self.itemconfig(g, fill=ui.activeTheme.color3)
+            self.itemconfig(g, fill=self.gridcolor)
             # border Lines here
+        ###create line obj pool
+        x = 15  # lines length
+        while x > -1:
+            self.lines.append(self.create_line(0, 0, 0, 0))
+            x -= 1
+        for l in self.lines:
+            self.itemconfigure(l,fill=self.rpmcolor)
+        x = 15  # lines length
+        while x > -1:
+            self.speedlines.append(self.create_line(0, 0, 0, 0))
+            x -= 1
+        for l in self.speedlines:
+            self.itemconfigure(l,fill=self.spdcolor)
+
         borders = []
         # x1, y1, x2, y2
         borders.append(self.create_line(0, 0, 0, 300))
@@ -417,13 +464,27 @@ class RevGraph(tk.Canvas):
             self.itemconfig(b, fill=ui.activeTheme.color1)
 
         self.create_text(30,14, text='RPM', fill=self.rpmcolor, justify=tk.RIGHT, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize*.8)))
-        self.create_text(70, 14, text='TQ', fill=self.tqcolor, justify=tk.RIGHT, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize*.8)))
-        self.create_text(305,330, text='Time Since Last Update', fill= ui.activeTheme.color1, font=(ui.activeTheme.font, ui.activeTheme.fontsize))
-        ###create line obj pool
-        x= 15 #lines length
-        while x > -1:
-            self.lines.append(self.create_line(0,0,0,0))
-            x-=1
+        self.create_text(self.graphwidth-60, 14, text='Speed (MPH)', fill=self.spdcolor, justify=tk.RIGHT, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize*.8)))
+        self.create_text(305,330, text='Time (1 Second)', fill= ui.activeTheme.color1, font=(ui.activeTheme.font, ui.activeTheme.fontsize))
+        #use for loop to create the labels
+        #rpm here
+        ypos=gridspacing
+        rpmct=7500
+        while (ypos < 300):
+            self.create_text(30,ypos, text=str(rpmct), fill=self.rpmcolor)
+            rpmct-=1500
+            ypos = ypos + gridspacing
+        self.create_text(30, 290, text=str(0), fill=self.rpmcolor)
+        # spd here
+        ypos = gridspacing
+        spdct = 120
+        while (ypos < 300):
+            self.create_text(self.graphwidth-30, ypos, text=str(spdct), fill=self.spdcolor)
+            spdct -= 24
+            ypos = ypos + gridspacing
+        self.create_text(self.graphwidth - 30, 290, text=str(0), fill=self.spdcolor)
+
+
 
     def cleargraph(self):
         #for s in self.lines:
@@ -445,7 +506,7 @@ class RevGraph(tk.Canvas):
 
 
     def debuggraph(self):
-        self.newdatapt(rand.randint(600,8000), rand.randint(0, 65000))
+        self.newdatapt(rand.randint(600,8000), rand.randint(0, 160))
         '''print("Graph debug\n---------")
         print("self.lines size: "+str(self.lines.__sizeof__())+' bytes')
         print("self.points size: " + str(self.points.__sizeof__()) + ' bytes')
@@ -461,10 +522,10 @@ class RevGraph(tk.Canvas):
 
 
 class datapt():
-    def __init__(self, rpmvalue, tqvalue):
+    def __init__(self, rpmvalue, spdvalue):
         self.Time = 0
         self.RPMvalue= rpmvalue
-        self.TQvalue= tqvalue
+        self.Speedvalue= spdvalue
     def passtime(self):
         self.Time = self.Time+1
 
@@ -479,6 +540,11 @@ class Page3(Page):
         title = tk.Label(frame, text='Fuel View', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                          font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.5), 'bold'))
         title.grid(column=0, row=0, sticky=tk.NW, pady=0)
+
+
+
+
+
 
         ###ADDSPACE ON LAST ROW AND COL
         spacecol = tk.Label(frame, text='', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
@@ -801,7 +867,8 @@ def startupdate():
     '''global oldtime
     initime= timeit.default_timer()'''
     updateUIData()
-    #graph.debuggraph()
+    if(UIINDEBUG):
+        graph.debuggraph()
     #time=timeit.default_timer()-initime
     #print (time)
     #####HERE is what we know, the graph function creates to many instances of lines over time
