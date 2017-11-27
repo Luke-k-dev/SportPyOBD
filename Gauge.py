@@ -9,8 +9,8 @@ class Gauge(tk.Canvas):
         self.hyp = float(float(self['width']) - 20) / 2.0
 
 
-    def style(self,style, color1, color4, font, fontsize):
-        self.Style= style #style is for gauge design
+    def style(self, color1, color4, font, fontsize):
+        self.Style= 0 #style is for gauge design removed this for better use
         self.Color1 = color1
         self.Color4 = color4
         self.DangerColor ='#ff3f1e'
@@ -24,8 +24,7 @@ class Gauge(tk.Canvas):
         if (self.Value < self.MinValue):
             self.Value = self.MinValue
         elif(self.Value > self.MaxValue):
-            #self.Value = self.MaxValue
-            pass
+            self.Value = self.MaxValue
         self.updatePOD()
 
 

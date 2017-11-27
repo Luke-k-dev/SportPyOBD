@@ -3,6 +3,7 @@ from  SportUI import *
 from  newobd import *
 import Tkinter as tk
 import ttk
+from BarGauge import BarGauge
 import commands
 from convert import *
 import random as rand
@@ -289,7 +290,7 @@ class Page1(Page):
 
 
         for s in stylearr:
-            s.style(0,ui.activeTheme.color1,ui.activeTheme.color4, ui.activeTheme.font, ui.activeTheme.fontsize)
+            s.style(ui.activeTheme.color1,ui.activeTheme.color4, ui.activeTheme.font, ui.activeTheme.fontsize)
             s.inidraw()
 
 class statusWarning(tk.Label):
@@ -351,7 +352,7 @@ class Page2(Page):
          mafg.setup(0, 0, 655, 'g/s', 75)
          tinygarr.append(mafg)
          for s in tinygarr:
-             s.style(0, ui.activeTheme.color1, ui.activeTheme.color4, ui.activeTheme.font, ui.activeTheme.fontsize)
+             s.style(ui.activeTheme.color1, ui.activeTheme.color4, ui.activeTheme.font, ui.activeTheme.fontsize)
              s.inidraw()
 
 
@@ -539,7 +540,15 @@ class Page3(Page):
         frame.pack(side="top", fill="both", expand=True)
         title = tk.Label(frame, text='Fuel View', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                          font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.5), 'bold'))
-        title.grid(column=0, row=0, sticky=tk.NW, pady=0)
+        title.grid(column=0, row=0, sticky=tk.NW, pady=0, columnspan=4)
+
+        #FUEL LEVEL REMAINING
+        t= tk.Label(frame, text='Fuel Level', fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.2)) )
+        t.grid(row=1, column=1, padx=25)
+        fuelgauge= BarGauge(frame, width=400, height=90)
+        fuelgauge.grid(column=0, row=2, columnspan=3, padx=15)
+        fuelgauge.style(ui.activeTheme.color1, ui.activeTheme.color4, "Helvetica", 34)
+        fuelgauge.setup(86, 0, 100, '%', 10)
 
 
 
@@ -553,6 +562,7 @@ class Page3(Page):
         spacerow = tk.Label(frame, text='', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                             font=(ui.activeTheme.font, ui.activeTheme.fontsize))
         spacerow.grid(column=0, row=99, pady=400)
+
 
 
 class PageSettings(Page):
