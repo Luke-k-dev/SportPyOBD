@@ -1,5 +1,5 @@
 # SportPyOBD
-Uses python to communicate with your car. This Library is designed to work with the FRS/BRZ/86 and the raspberry pi.
+Initially this was to be a package to easily create OBDII interfaces, however over its development I have instead created an OBDII interface program. It is designed to run on OSX and the respberrypi. It has a clean modern UI that is easily editable, and can record vehicle data.
 
 <h2>Acknowledgements</h2>
 <p>As with many works, this is one built off of fantastic work by others. I have built this software using some coede from https://github.com/brendan-w who used code from https://github.com/peterh/pyobd. My goal in this project is to update their work to make it work easily with the FRS/BRZ/86 and provide an easy to customize graphical interface for the data. I am also open to supporting more cars but as of now, this project will be directed tword the car models listed above.</p>
@@ -27,7 +27,7 @@ Uses python to communicate with your car. This Library is designed to work with 
 </p>
 
 <h1>Usage</h1>
-<p>This will be updated shortly when the code is uploaded</p>
+<p>Initially this was to be a package to easily create OBDII interfaces, however over its development I have instead created an OBDII interface program. It is designed to run on OSX and the respberrypi. To use simply download the package, make sure you have the OBDII drivers installed, make sure the port is correct in the newOBD class(/dev/ttyUSB0/ or something), connect to your car, and run main.py </p>
 
 
 <h1>Help! How do I code the GUI?!</h1>
