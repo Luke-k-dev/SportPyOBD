@@ -8,6 +8,7 @@ import commands
 from convert import *
 import random as rand
 from Gauge import Gauge
+
 global currentPage
 currentPage=1
 global carvin
@@ -40,9 +41,9 @@ Settings = settings()
 # THEMES ARE HERE COLOR COLOR COLOR COLOR FONT SIZE
 #FONT COLOR 1, FONT COLOR 2, PROGRESS BAR COLOR, backgourd color
 # theme 1
-t1 = css("#1e74ff", "#493030", "#332a23", "#303030", "Helvetica", 20)
+t1 = css("#ef2d2d", '#493030', "#332a23", "#303030", "Helvetica", 20)
 # theme 2
-t2 = css("#382", "#233", "#FFF", "#FFF", "Helvetica", 20)
+t2 = css("#1e74ff", "#493030", "#332a23", "#303030", "Helvetica", 20)
 # theme 3
 t3 = css("#283334", "#343334", "#333344", "#FF333F", "Helvetica", 20)
 
@@ -363,7 +364,7 @@ class RevGraph(tk.Canvas):
     def __init__(self, *args, **kwargs):
         tk.Canvas.__init__(self, *args,**kwargs)
         self.rpmcolor = ui.activeTheme.color1
-        self.spdcolor = '#57ed70'
+        self.spdcolor = '#ef9a2d'
         self.gridcolor='#232323'
         self.timescale=50 #50px =1 second
         self.graphwidth=600
@@ -543,16 +544,30 @@ class Page3(Page):
         title.grid(column=0, row=0, sticky=tk.NW, pady=0, columnspan=4)
 
         #FUEL LEVEL REMAINING
-        t= tk.Label(frame, text='Fuel Level', fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.2)) )
-        t.grid(row=1, column=1, padx=25)
+        t= tk.Label(frame, text='Fuel Level', fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)) )
+        t.grid(row=1, column=0, columnspan=3, sticky=tk.W, padx=17)
         fuelgauge= BarGauge(frame, width=400, height=90)
         fuelgauge.grid(column=0, row=2, columnspan=3, padx=15)
         fuelgauge.style(ui.activeTheme.color1, ui.activeTheme.color4, "Helvetica", 34)
         fuelgauge.setup(86, 0, 100, '%', 10)
 
+        ##vert spacer
+        spacer1=tk.Label(frame, text='                         ', bg= ui.activeTheme.color4)
+        spacer1.grid(row=2, column=4)
 
+        #miles to empty 330 * fuel remaing
+        fuelrtitle = tk.Label(frame, text='Range', fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)) )
+        fuelrtitle.grid(row=1, column=5, sticky=tk.W)
+        RangeValue = tk.Label(frame, text='227', fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 4)))
+        RangeValue.grid(row=2, column=5, sticky=tk.SW)
+        RangeLabel= tk.Label(frame, text='Miles', fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1)))
+        RangeLabel.grid(row=2, column=6, sticky= tk.SW, pady=13)
+        #throtle position %
+        fuelrtitle = tk.Label(frame, text='Throtle Position', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
+                              font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)))
+        fuelrtitle.grid(row=3, column=0, columnspan=3, sticky=tk.W)
 
-
+        #Fuel Rate
 
 
         ###ADDSPACE ON LAST ROW AND COL

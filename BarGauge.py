@@ -27,7 +27,7 @@ class BarGauge(tk.Canvas):
             self.itemconfigure(l, fill= self.Color1, width=2)
 
         self.Bar = self.create_rectangle(5,5, 10, self.height, fill= self.Color1, outline=self.Color1)
-        self.ValueText= self.create_text(.5*self.width, self.height/2, text= '10%', font=(self.Font, int(self.height*.8)), fill='White')
+        self.ValueText= self.create_text(.5*self.width, self.height/2+3, text= '10%', font=(self.Font, int(self.height*.8)), fill='White')
 
 
         #last
@@ -40,7 +40,7 @@ class BarGauge(tk.Canvas):
             w=self.width
         self.coords(self.Bar,5,5,w, self.height)
         if(self.NormalizedValue>0.5):
-            self.itemconfigure(self.ValueText, fill = 'black')
+            self.itemconfigure(self.ValueText, fill = self.Color4)
 
         else:
             self.itemconfigure(self.ValueText, fill='#fff')
