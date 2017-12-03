@@ -4,6 +4,7 @@ from  newobd import *
 import Tkinter as tk
 import ttk
 from BarGauge import BarGauge
+from FuelTrimGauge import FuelTrimGauge
 import commands
 from convert import *
 import random as rand
@@ -566,10 +567,45 @@ class Page3(Page):
         fuelrtitle = tk.Label(frame, text='Throtle Position', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
                               font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)))
         fuelrtitle.grid(row=3, column=0, columnspan=3, sticky=tk.W)
+        fuelgauge = BarGauge(frame, width=400, height=50)
+        fuelgauge.grid(column=0, row=4, columnspan=3, padx=15)
+        fuelgauge.style(ui.activeTheme.color1, ui.activeTheme.color4, "Helvetica", 34)
+        fuelgauge.setup(10, 0, 100, '%', 10)
+        #Fuel Rate 015E
+        fuelrtitle = tk.Label(frame, text='Fuel Rate', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
+                              font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)))
+        fuelrtitle.grid(row=3, column=5, sticky=tk.W)
+        RangeValue = tk.Label(frame, text='4.7', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
+                              font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 4)))
+        RangeValue.grid(row=4, column=5, sticky=tk.SW)
+        RangeLabel = tk.Label(frame, text='Gal/Hr', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
+                              font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1)))
+        RangeLabel.grid(row=4, column=6, sticky=tk.SW, pady=13)
 
-        #Fuel Rate
+        ###Fuel Trim Gauge here
+        FuelTrimt= tk.Label(frame, text='Fuel Trim', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
+                              font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)))
+        FuelTrimt.grid(row=5, column=0)
+        FuelTrimG = FuelTrimGauge(frame, width=780, height=55)
+        FuelTrimG.grid(row=6, column=0, columnspan=10, padx=10)
+        FuelTrimG.style(ui.activeTheme.color1,ui.activeTheme.color4,ui.activeTheme.font,ui.activeTheme.fontsize)
+        FuelTrimG.setup(10,-100,100,'%')
+        FuelTrimG.changeValue(.75)
 
-
+        #fuel type banner
+        fueltypes=['91', '93', '95', '97',  'E85*']
+        spacing='                '
+        ftext= 'FUEL TYPES:'
+        ftext+=spacing
+        for t in fueltypes:
+            ftext+=t+spacing
+        fueltypebanner= tk.Label(frame, text=ftext,
+                                 fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1)))
+        fueltypebanner.grid(row=97, column=0, columnspan=95, sticky= tk.W, padx=10)
+        fueltypewarning = tk.Label(frame, text='* requires ECU tune.',
+                                  fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
+                                  font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .5)))
+        fueltypewarning.grid(row=98, column=0, columnspan=95, sticky=tk.W, padx=10)
         ###ADDSPACE ON LAST ROW AND COL
         spacecol = tk.Label(frame, text='', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                             font=(ui.activeTheme.font, ui.activeTheme.fontsize))
