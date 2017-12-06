@@ -33,9 +33,7 @@ else:
 
     com = OBDcom('/dev/ttyUSB0', 115200, '6') ###POROTCAL 6 FOR 2013 FRS
 
-###READ EG SETTINGS ETC
-global Settings
-Settings = settings()
+
 
 
 ###NOW LOAD IN UI DATA###
@@ -111,6 +109,13 @@ tqcmd=commands.getPID("THROTTLE_POS")
 ###UPDATE DATA FUNCTIONS
 global firstpass
 firstpass= True
+
+###DATA RECORDER HERE###
+import DataRecorder as dr
+global Recorder
+Recorder = dr.Recorder()
+
+
 def updateUIData():
     ###STORE ALL PID IN ARRAY FOR EASIER UPDATING WITH FOR LOOP
     ###ALSO REDUCE DELAY FOR COM to .09 this will allow fast comunication and no overload and backup on obd que
@@ -119,6 +124,12 @@ def updateUIData():
     ###CHECK PAGE BY PAGE FOR UPDATES B/C UPDATING ALL AT ONCE IS BAD AF
     if(UIINDEBUG):
         checkforstatus()
+        if(Recorder.Recording):
+            ct=0
+            while ct < len(Recorder.PIDS):
+                Recorder.recordTimeSlot(Recorder.PIDS[ct], ct)
+                ct+=1
+            Recorder.AdvanceTime()
         return
     if(firstpass):
         firstpass=False
@@ -135,7 +146,15 @@ def updateUIData():
         localtq= int(((float(localrpm) *  5252)/hp))
         graph.newdatapt(localrpm,localtq)
     if currentPage ==3:
+        #TODO:FUEL CODE
         pass
+    if(currentPage==4):
+        if (Recorder.Recording):
+            ct = 0
+            while ct < len(Recorder.PIDS):
+                Recorder.recordTimeSlot(Recorder.PIDS[ct], com.query(commands.getPID(Recorder.PIDS[ct])))
+                ct += 1
+            Recorder.AdvanceTime()
 
 
 
@@ -563,26 +582,30 @@ class Page3(Page):
         RangeValue.grid(row=2, column=5, sticky=tk.SW)
         RangeLabel= tk.Label(frame, text='Miles', fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1)))
         RangeLabel.grid(row=2, column=6, sticky= tk.SW, pady=13)
+        # spacer here
+        spacerforlastthing = tk.Label(frame, bg=ui.activeTheme.color4, text='  ')
+        spacerforlastthing.grid(column=0, row=3, columnspan=20, pady=10)
         #throtle position %
         fuelrtitle = tk.Label(frame, text='Throtle Position', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
                               font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)))
-        fuelrtitle.grid(row=3, column=0, columnspan=3, sticky=tk.W)
+        fuelrtitle.grid(row=4, column=0, columnspan=3, sticky=tk.W)
         fuelgauge = BarGauge(frame, width=400, height=50)
-        fuelgauge.grid(column=0, row=4, columnspan=3, padx=15)
+        fuelgauge.grid(column=0, row=5, columnspan=3, padx=15)
         fuelgauge.style(ui.activeTheme.color1, ui.activeTheme.color4, "Helvetica", 34)
         fuelgauge.setup(10, 0, 100, '%', 10)
         #Fuel Rate 015E
         fuelrtitle = tk.Label(frame, text='Fuel Rate', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
                               font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)))
-        fuelrtitle.grid(row=3, column=5, sticky=tk.W)
+        fuelrtitle.grid(row=4, column=5, sticky=tk.W)
         RangeValue = tk.Label(frame, text='4.7', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
                               font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 4)))
-        RangeValue.grid(row=4, column=5, sticky=tk.SW)
+        RangeValue.grid(row=5, column=5, sticky=tk.SW)
         RangeLabel = tk.Label(frame, text='Gal/Hr', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
                               font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1)))
-        RangeLabel.grid(row=4, column=6, sticky=tk.SW, pady=13)
+        RangeLabel.grid(row=5, column=6, sticky=tk.SW, pady=13)
 
-        ###Fuel Trim Gauge here
+        #not using this because it looks bad
+        ''''###Fuel Trim Gauge here
         FuelTrimt= tk.Label(frame, text='Fuel Trim', fg=ui.activeTheme.color1, bg=ui.activeTheme.color4,
                               font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)))
         FuelTrimt.grid(row=5, column=0)
@@ -590,8 +613,10 @@ class Page3(Page):
         FuelTrimG.grid(row=6, column=0, columnspan=10, padx=10)
         FuelTrimG.style(ui.activeTheme.color1,ui.activeTheme.color4,ui.activeTheme.font,ui.activeTheme.fontsize)
         FuelTrimG.setup(10,-100,100,'%')
-        FuelTrimG.changeValue(.75)
-
+        FuelTrimG.changeValue(.75)'''
+        #spacer here
+        spacerforlastthing= tk.Label(frame, bg=ui.activeTheme.color4, text ='  ')
+        spacerforlastthing.grid(column=0, row=6, columnspan=20, pady=0)
         #fuel type banner
         fueltypes=['91', '93', '95', '97',  'E85*']
         spacing='                '
@@ -616,74 +641,34 @@ class Page3(Page):
 
 
 
-class PageSettings(Page):
+class Record(Page):
     def __init__(self, *args, **kwargs):
         global ui
+        global Recorder
         rownum=0
         Page.__init__(self, *args, **kwargs)
         frame = tk.Frame(self)
         frame.pack(side="top", fill="both", expand=True)
         frame.config(bg=ui.activeTheme.color4)
-        title = tk.Label(frame, text='Settings', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
+        title = tk.Label(frame, text='Record Data', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                          font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * 1.5), 'bold'))
         title.grid(row=rownum, column=0, pady=0, sticky= tk.NW)
-
+        self.pidarr=["RPM", 'SPEED', 'MAF', 'OIL_TEMP', 'COOLANT_TEMP']
+        self.checkboxarr=[]
+        self.vararr=[]
         #do row nums to add temp support in settings
-        
-        ###PEDAL DANCE CTRL HERE###
-        rownum=1
-        showpedaltxt=tk.Label(frame, text='Show Track Pop-Up:', bg =ui.activeTheme.color4, fg=ui.activeTheme.color1, font= (ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        showpedaltxt.grid(column=0, row=rownum, sticky=tk.E)
-        showpedalbtn= toggle(frame)
-        showpedalbtn.grid(column = 2, row=rownum, sticky= tk.NW)
-        showpedalbtn.load('PedalDancePopUp')
+        ct=0
+        while ct < len(self.pidarr):
+            self.vararr.append(tk.StringVar())
+            self.vararr[ct].set('F')
+            self.checkboxarr.append(tk.Checkbutton(frame, text= self.pidarr[ct],variable=self.vararr[ct], onvalue='T', offvalue='F',state=tk.ACTIVE,
+                                                   bg= ui.activeTheme.color4, fg=ui.activeTheme.color1))
+            self.checkboxarr[ct].grid(row=ct+1, column=1, sticky= tk.W)
+            ct+=1
 
-        ###PEDAL DANCE CTRL HERE###
-        showpedaltxt = tk.Label(frame, text='Show Turbo Info:', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
-                                font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        showpedaltxt.grid(column=0, row=2, sticky=tk.E)
-        showpedalbtn = toggle(frame)
-        showpedalbtn.grid(column=2, row=2, sticky=tk.NW)
-        showpedalbtn.load('ShowTurbo')
-
-        ###THEME BUTTONS HERE
-        themetitle = tk.Label(frame, text='Theme:',bg=ui.activeTheme.color4, fg=ui.activeTheme.color1, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        themetitle.grid(column=0, row=3, sticky= tk.E)
-        ###THEME SELECT BUTTONS WILL USE COL 1 LIKE THE SPACER
-        nxt = themeclicker(frame)
-        nxt.load(1)
-        nxt.grid(column=1, row=3, sticky=tk.NE, padx= 90)
-
-        themeid = themeLabel(frame)
-        themeid.grid(column =1, row=3, sticky = tk.NS)
-
-        prev = themeclicker(frame)
-        prev.load(-1)
-        prev.grid(column=1, row=3, sticky=tk.NW, padx=90)
-
-
-        divider= tk.Label(frame, text='Stats:', background = ui.activeTheme.color4, fg=ui.activeTheme.color1,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize *1.35)))
-        divider.grid(column=0, row=4, pady=25)
-        ###STATS HERE###
-        #0 to 60
-        ZT60title = tk.Label(frame, text= "Zero to 60: ",bg=ui.activeTheme.color4, fg=ui.activeTheme.color1, font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        ZT60title.grid(column=0, row =5, sticky = tk.NE)
-        ZT60value = tk.Label(frame, text="6.31", bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
-                             font=(ui.activeTheme.font, int(ui.activeTheme.fontsize)))
-        ZT60value.grid(column=1, row=5, sticky=tk.NW)
-        ZT60cal = tk.Button(frame, text='0-60 Pull')#need styling
-        ZT60cal.grid(column=2, row =5)
-
-        #hp
-
-        #ODO
-
-        #TQ
-
-        ###SPACE COL 1###
-        spacer = tk.Label(frame, text=" ", bg=ui.activeTheme.color4)
-        spacer.grid(column=1, row=0,padx=250)
-
+        #start / stop recording
+        self.startstop = tk.Button(frame, text='START', command = self.startstop)
+        self.startstop.grid(row=90, column=1)
         ###ADDSPACE ON LAST ROW AND COL
         spacecol = tk.Label(frame, text='', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                             font=(ui.activeTheme.font, ui.activeTheme.fontsize))
@@ -691,6 +676,35 @@ class PageSettings(Page):
         spacerow = tk.Label(frame, text='', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                             font=(ui.activeTheme.font, ui.activeTheme.fontsize))
         spacerow.grid(column=0, row=99, pady=400)
+
+    def startstop(self):
+        global Recorder
+        if(self.startstop['text']=='START'):
+            ###START RECORDING###
+            self.startstop.config(text='STOP')
+            recordarr=[]
+            ct=0
+
+            while ct< len(self.pidarr):
+                #print('VAR IS'+self.vararr[ct].get())
+                self.checkboxarr[ct].config(state=tk.DISABLED)
+                if(self.vararr[ct].get()=='T'):
+                    #print('GOOD')
+                    recordarr.append(self.pidarr[ct])
+
+                ct+=1
+            print(recordarr)
+            Recorder.SetPIDS(recordarr)
+            Recorder.GenFrame()
+            Recorder.Recording=True
+
+        elif(Recorder.Time>5):
+            ###STOP THIS RECORDING###
+            self.startstop.config(text='START')
+            Recorder.Recording=False
+            Recorder.WriteToFile()
+
+
 
 class themeLabel(tk.Label):
     global ui
@@ -773,51 +787,10 @@ class themeclicker(tk.Button):
             self.mode = False
             self['text'] ="Prev"
 
-class toggle(tk.Button):
-    global Settings
-    global ui
-    ###NEVER PASS STYLES WHEN CREATING OBJECT INSTACE MODIFY THISS CLASS DIRECTLY OR DUPLICATE AND MODIFY
-    def __init__(self, *args, **kwargs):
-        tk.Button.__init__(self, *args, **kwargs)
-        self['command']= self.clickit
-        ###STYLES LOADED IN HERE IN CLASS INIT
-        self.configure(borderwidth = 0, highlightthickness=0, fg= ui.activeTheme.color1, pady=10, font = (ui.activeTheme.font, int(ui.activeTheme.fontsize* .5), 'bold'), width=12)
-        self.enabled= False
-        self['text'] = 'OFF'
-    def clickit(self):
-        if(self.enabled):
-            self.enabled=False
-            self['text']='OFF'
-        else:
-            self.enabled = True
-            self['text'] = 'ON'
-        #print (str(self.enabled))
-
-    def seton(self):
-        self.enabled=True
-        self['text'] = 'ON'
-
-    def setoff(self):
-        self.enabled=False
-        self['text'] = 'OFF'
-    def load(self, settingkey):
-        if settingkey=="PedalDancePopUp":
-            if(Settings.PedalDancePopUp):
-                self.seton()
-            else:
-                self.setoff()
-        ###REPEAT STRUCTURE FOR OTHER TOGGLES
-        if settingkey=="ShowTurbo":
-            if(Settings.ShowTurbo):
-                self.seton()
-            else:
-                self.setoff()
-        ###REPEAT STRUCTURE FOR OTHER TOGGLES
-
 
 class MainView(tk.Frame):
     global p4
-    def loadsettings(self):
+    def loadRecord(self):
         global p4
         p4.show()
 
@@ -836,7 +809,7 @@ class MainView(tk.Frame):
         p1 = Page1(self)
         p2 = Page2(self)
         p3 = Page3(self)
-        p4 = PageSettings(self)
+        p4 = Record(self)
 
         p1.id='p1'
         p2.id='p2'
@@ -880,7 +853,7 @@ class MainView(tk.Frame):
         b2.configure(command= p2.show)
         b3 = tk.Button(buttonframe, text="Fuel View")
         b3.configure(command=p3.show)
-        b4 = tk.Button(buttonframe, text="Settings")
+        b4 = tk.Button(buttonframe, text="Record")
         b4.configure(command=p4.show)
         ###asign nav list and id###
         b1.id='b1'
@@ -954,7 +927,6 @@ def reloadui():
     ####start update methods####
 
     startupdate()
-    main.loadsettings()
     root.mainloop()
 
 ####start update methods####
