@@ -93,7 +93,7 @@ class PIDDATA():
         self.Value= newvalue
 
 
-global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp,OilTemp, FuelRate, AirIntakeTemp, ThrottlePos, MAFORBOOST
+global CoolantTemp, AbsoluteEngineLoad,FuelLVL, BHP, FuelTrim, MAF, IntakeAirTemp,OilTemp,OilTemp2, FuelRate, AirIntakeTemp, ThrottlePos, MAFORBOOST
 
 #UI VARS
 
@@ -106,6 +106,7 @@ engineloadcmd=commands.getPID("ENGINE_LOAD")
 throttlecmd=commands.getPID("THROTTLE_POS")
 rpmcmd=commands.getPID("RPM")
 tqcmd=commands.getPID("THROTTLE_POS")
+fuellvlcmd= commands.getPID('FUEL_LEVEL')
 ###UPDATE DATA FUNCTIONS
 global firstpass
 firstpass= True
@@ -119,7 +120,7 @@ Recorder = dr.Recorder()
 def updateUIData():
     ###STORE ALL PID IN ARRAY FOR EASIER UPDATING WITH FOR LOOP
     ###ALSO REDUCE DELAY FOR COM to .09 this will allow fast comunication and no overload and backup on obd que
-    global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos, MAFORBOOST
+    global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos, MAFORBOOST, FuelLVL
     global firstpass
     ###CHECK PAGE BY PAGE FOR UPDATES B/C UPDATING ALL AT ONCE IS BAD AF
     if(UIINDEBUG):
@@ -145,9 +146,14 @@ def updateUIData():
         localrpm=int(com.query(rpmcmd))
         localtq= int(((float(localrpm) *  5252)/hp))
         graph.newdatapt(localrpm,localtq)
+        localoil=(int(com.query(oilcmd)))
+        OilTemp2.changeValue(CtoF(localoil))
+        MAF2.changeValue(int(com.query(MAFcmd)))
+
     if currentPage ==3:
-        #TODO:FUEL CODE
-        pass
+        #TODO:fuel code
+        FuelLVL.changeValue(int(com.query(fuellvlcmd)))
+        #fuel cmd
     if(currentPage==4):
         if (Recorder.Recording):
             ct = 0
@@ -337,7 +343,7 @@ class Page2(Page):
     def __init__(self, *args, **kwargs):
          global graph
          global ui
-         global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF, IntakeAirTemp, OilTemp, FuelRate, AirIntakeTemp, ThrottlePos
+         global CoolantTemp, AbsoluteEngineLoad, BHP, FuelTrim, MAF2, IntakeAirTemp, OilTemp2, FuelRate, AirIntakeTemp, ThrottlePos
          Page.__init__(self, *args, **kwargs)
          frame = tk.Frame(self, bg = ui.activeTheme.color4)
          frame.pack(side="top", fill="both", expand=True)
@@ -352,6 +358,7 @@ class Page2(Page):
          graph.grid(column=2, row=rownum, rowspan=5)
 
          #tiny gauges here
+
          tinygarr=[]
          gaugepady=0
          gaugepadx=20
@@ -363,6 +370,7 @@ class Page2(Page):
          oilg = Gauge(frame, width=150, height=150)
          oilg.grid(column=0, row=2, pady=gaugepady, padx=gaugepadx, sticky= gaugesticky)
          oilg.setup(32, -10, 280, '°F', 10)
+         OilTemp2= PIDDATA(oilg)
          tinygarr.append(oilg)
          #MAF
          t = tk.Label(frame, text='MAF', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
@@ -372,6 +380,7 @@ class Page2(Page):
          mafg.grid(column=0, row=4, pady=gaugepady, padx=gaugepadx, sticky=gaugesticky)
          mafg.setup(0, 0, 655, 'g/s', 75)
          tinygarr.append(mafg)
+         MAF2 = PIDDATA(mafg)
          for s in tinygarr:
              s.style(ui.activeTheme.color1, ui.activeTheme.color4, ui.activeTheme.font, ui.activeTheme.fontsize)
              s.inidraw()
@@ -566,10 +575,10 @@ class Page3(Page):
         #FUEL LEVEL REMAINING
         t= tk.Label(frame, text='Fuel Level', fg = ui.activeTheme.color1, bg=ui.activeTheme.color4,font=(ui.activeTheme.font, int(ui.activeTheme.fontsize * .8)) )
         t.grid(row=1, column=0, columnspan=3, sticky=tk.W, padx=17)
-        fuelgauge= BarGauge(frame, width=400, height=90)
-        fuelgauge.grid(column=0, row=2, columnspan=3, padx=15)
-        fuelgauge.style(ui.activeTheme.color1, ui.activeTheme.color4, "Helvetica", 34)
-        fuelgauge.setup(86, 0, 100, '%', 10)
+        fuellvlgauge= BarGauge(frame, width=400, height=90)
+        fuellvlgauge.grid(column=0, row=2, columnspan=3, padx=15)
+        fuellvlgauge.style(ui.activeTheme.color1, ui.activeTheme.color4, "Helvetica", 34)
+        fuellvlgauge.setup(86, 0, 100, '%', 10)
 
         ##vert spacer
         spacer1=tk.Label(frame, text='                         ', bg= ui.activeTheme.color4)
@@ -638,6 +647,8 @@ class Page3(Page):
         spacerow = tk.Label(frame, text='', bg=ui.activeTheme.color4, fg=ui.activeTheme.color1,
                             font=(ui.activeTheme.font, ui.activeTheme.fontsize))
         spacerow.grid(column=0, row=99, pady=400)
+        global FuelLVL
+        FuelLVL= PIDDATA(fuellvlgauge)
 
 
 

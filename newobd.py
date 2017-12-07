@@ -221,7 +221,7 @@ class OBDcom:
                 return True
         return False
     
-    def __send(self, cmd, delay=.3):
+    def __send(self, cmd, delay=.1):
         """
             unprotected send() function
 

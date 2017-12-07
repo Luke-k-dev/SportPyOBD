@@ -111,7 +111,7 @@ __mode1__ = [
     OBDCommand("COMMANDED_EGR"              , "Commanded EGR"                           , b"012C", 3, percent,               ECU.ENGINE, True),
     OBDCommand("EGR_ERROR"                  , "EGR Error"                               , b"012D", 3, percent_centered,      ECU.ENGINE, True),
     OBDCommand("EVAPORATIVE_PURGE"          , "Commanded Evaporative Purge"             , b"012E", 3, percent,               ECU.ENGINE, True),
-    OBDCommand("FUEL_LEVEL"                 , "Fuel Level Input"                        , b"012F", 3, percent,               ECU.ENGINE, True),
+    OBDCommand("FUEL_LEVEL"                 , "Fuel Level Input"                        , b"012F", 3, FuelLevel,               ECU.ENGINE, True),
     OBDCommand("WARMUPS_SINCE_DTC_CLEAR"    , "Number of warm-ups since codes cleared"  , b"0130", 3, uas(0x01),             ECU.ENGINE, True),
     OBDCommand("DISTANCE_SINCE_DTC_CLEAR"   , "Distance traveled since codes cleared"   , b"0131", 4, uas(0x25),              ECU.ENGINE, True),
     OBDCommand("EVAP_VAPOR_PRESSURE"        , "Evaporative system vapor pressure"       , b"0132", 4, evap_pressure,         ECU.ENGINE, True),

@@ -119,11 +119,30 @@ Return pint Quantities
 
 # 0 to 100 %
 def percent(messages):
-    d = messages[0].data[2:]
-    v = d[0]
-    v = v * 100.0 / 255.0
-    #return v * Unit.percent
-    return messages[0].data[0]
+    d = messages[0].raw()
+    # print(d)
+    v = d[9:11]
+    v = int(v, 16)
+
+    v = float(v) * 100.0 / 255.0
+
+    # print(v)
+    # return v * Unit.percent
+    return int(v)
+
+def FuelLevel(messages):
+    d = messages[0].raw()
+    #print(d)
+    v = d[9:11]
+    v = int(v,16)
+
+
+    v = float(v) * 100.0 / 255.0
+
+    #print(v)
+    # return v * Unit.percent
+    return int(v)
+
 
 def enginepercent(messages):
     d = str(messages[0].raw())
