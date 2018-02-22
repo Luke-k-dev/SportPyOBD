@@ -20,6 +20,9 @@ graph= None
 UIINDEBUG= True ###PLEASE USE THIS
 import timeit
 
+#down the threading rabbit hole we go allice
+import threading
+
 global COMERROR
 COMERROR=False
 
@@ -124,6 +127,7 @@ def updateUIData():
     global firstpass
     ###CHECK PAGE BY PAGE FOR UPDATES B/C UPDATING ALL AT ONCE IS BAD AF
     if(UIINDEBUG):
+        #tie up process for a bit
         checkforstatus()
         if(Recorder.Recording):
             ct=0
@@ -864,12 +868,15 @@ class MainView(tk.Frame):
         b2.configure(command= p2.show)
         b3 = tk.Button(buttonframe, text="Fuel View")
         b3.configure(command=p3.show)
+
+
         b4 = tk.Button(buttonframe, text="Record")
         b4.configure(command=p4.show)
         ###asign nav list and id###
         b1.id='b1'
         b2.id='b2'
         b3.id='b3'
+        ###REMOVED FOR INI BUILD
         b4.id='b4'
         buttonNavList = {b1,b2,b3,b4}
         ###ADD SHARED BTN ATTR###
@@ -885,7 +892,7 @@ class MainView(tk.Frame):
 
         
         ###PACK THE BUTTONS FOR THE NAV###
-        b4.pack(side='right')
+        #b4.pack(side='right')
         b3.pack(side="right")
         b2.pack(side="right")
         b1.pack(side="right")
@@ -908,12 +915,21 @@ root = tk.Tk()
 main = MainView(root)
 '''global oldtime
 oldtime =7'''
+global updatethread
+updatethread=threading.Thread()
 def startupdate():
     '''global oldtime
     initime= timeit.default_timer()'''
-    updateUIData()
+    global updatethread
+    if(updatethread.isAlive()!=True):
+        updatethread = threading.Thread(target=updateUIData)
+        updatethread.start()
+    '''print(updatethread.is_alive())
+    print('Thread count: '+str(threading.active_count()))'''
+
     if(UIINDEBUG):
         graph.debuggraph()
+
     #time=timeit.default_timer()-initime
     #print (time)
     #####HERE is what we know, the graph function creates to many instances of lines over time
@@ -925,6 +941,7 @@ def startupdate():
             print("######WARING VERY SLOW#######")
         print ('slower')
     oldtime = time'''
+
     root.after(1000, startupdate)
 
 
@@ -943,6 +960,7 @@ def reloadui():
 ####start update methods####
 main.pack(side="top", fill="both", expand=True)
 root.wm_geometry("800x480")
+print('start update thread...')
 startupdate()
 root.mainloop()
 
