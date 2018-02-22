@@ -27,7 +27,9 @@ Initially this was to be a package to easily create OBDII interfaces, however ov
 </p>
 
 <h1>Usage</h1>
-<p>Initially this was to be a package to easily create OBDII interfaces, however over its development I have instead created an OBDII interface program. It is designed to run on OSX and the respberrypi. To use simply download the package, make sure you have the OBDII drivers installed, make sure the port is correct in the newOBD class(/dev/ttyUSB0/ or something), connect to your car, and run main.py </p>
+<p>Initially this was to be a package to easily create OBDII interfaces, however over its development I have instead created an OBDII interface program. It is designed to run on OSX and the respberrypi. To use simply download the package, make sure you have the OBDII drivers installed, make sure the port is correct in the newOBD class(/dev/ttyUSB0/ or something), connect to your car, and run main.py
+  <b>NOTE: YOU MUST SET UIINDEBUG =  False in Main.py IF YOU DO NOT DO THIS SportPyOBD will not connect</b>
+</p>
 
 
 <h1>Help! How do I code the GUI?!</h1>
