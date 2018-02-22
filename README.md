@@ -12,6 +12,7 @@ Initially this was to be a package to easily create OBDII interfaces, however ov
   <li>This package properly installed</li>
   <li>OBD2 ELM 327 USB adapter</li>
   <li>HDMI Display</li>
+  <li>Linux/OSX device and power source (I am using a rapsbery pi 3 and <a href="http://www.pimodulescart.com/shop/item.aspx?itemid=30">a powerbackup for it made by PiModules</a>)</li>
   <li>ELM 327 COM Port Driver (Should come with adapter or be installed with linux)</li>
   <li>Screen (sudo apt-get install screen) this is for testing car commands and to verify setup</li>
 </ul>
@@ -30,6 +31,9 @@ Initially this was to be a package to easily create OBDII interfaces, however ov
 <p>Initially this was to be a package to easily create OBDII interfaces, however over its development I have instead created an OBDII interface program. It is designed to run on OSX and the respberrypi. To use simply download the package, make sure you have the OBDII drivers installed, make sure the port is correct in the newOBD class(/dev/ttyUSB0/ or something), connect to your car, and run main.py
   <b>NOTE: YOU MUST SET UIINDEBUG =  False in Main.py IF YOU DO NOT DO THIS SportPyOBD will not connect</b>
 </p>
+
+<h1>Install</h1>
+<p>A full install guide will be posted here after installing in my FRS.</p>
 
 
 <h1>Help! How do I code the GUI?!</h1>
